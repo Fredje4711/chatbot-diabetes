@@ -194,24 +194,3 @@ async function logEvasive(question, answer, detection) {
     body: JSON.stringify(payload)
   });
 }
-
-// TESTKNOP: handmatige logging proberen
-function testLog() {
-  const payload = {
-    origin: "https://fredje4711.github.io/chatbot-diabetes/",
-    question: "TESTVRAAG (manueel)",
-    answer: "TESTANTWOORD (manueel)",
-    matchedWords: ["test"],
-    matchedPhrases: ["testzin"],
-    note: "handmatige test via knop"
-  };
-
-  fetch(LOG_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(payload)
-  })
-    .then(r => r.text())
-    .then(res => alert("Respons van server: " + res))
-    .catch(err => alert("Fout bij versturen: " + err));
-}
