@@ -1,8 +1,11 @@
-// === Instellingen ===
 const API_URL = "https://broad-king-6e2d.fredje4711.workers.dev";
 const MODEL = "gpt-4o";
 
-const SYSTEM_PROMPT = `Je bent een Nederlandstalige chatbot van de Diabetes Liga Midden-Limburg. Beantwoord vragen over diabetes (type 1, type 2, zwangerschapsdiabetes, symptomen, behandeling, voeding, enz.) en over de werking van onze organisatie. Antwoord altijd in duidelijke, vriendelijke mensentaal.`;
+// System-prompt los van extra context
+const SYSTEM_PROMPT = `Je bent een Nederlandstalige chatbot van de Diabetes Liga Midden-Limburg. Je beantwoordt vragen over diabetes én over de werking, contactpersonen en activiteiten van onze lokale vereniging. Antwoord vriendelijk, duidelijk, feitelijk juist en menselijk.`;
+
+// Wordt later gevuld met info uit KB-bestanden
+let extraContext = "";
 
 // === UI: chat openen/sluiten ===
 document.getElementById("chatbot-button").addEventListener("click", () => {
@@ -16,9 +19,7 @@ document.getElementById("chatbot-input").addEventListener("keypress", function (
   if (e.key === "Enter") sendMessage();
 });
 
-let messages = [
-  { role: "system", content: SYSTEM_PROMPT }
-];
+let messages = [];
 
 async function sendMessage() {
   const input = document.getElementById("chatbot-input");
@@ -28,14 +29,16 @@ async function sendMessage() {
   addMessage("user", userMessage);
   input.value = "";
 
-  messages.push({ role: "user", content: userMessage });
+  // Bouw berichten opnieuw bij elke vraag (GPT-context is beperkt)
+  messages = [
+    { role: "system", content: SYSTEM_PROMPT + "\n\nExtra informatie:\n" + extraContext },
+    { role: "user", content: userMessage }
+  ];
 
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
         messages: messages,
@@ -46,7 +49,6 @@ async function sendMessage() {
     const data = await response.json();
     const botReply = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
     addMessage("assistant", botReply);
-    messages.push({ role: "assistant", content: botReply });
 
   } catch (err) {
     addMessage("assistant", "Er is een fout opgetreden. Probeer opnieuw.");
@@ -62,4 +64,44 @@ function addMessage(role, text) {
   message.textContent = (role === "user" ? "👤 " : "🤖 ") + text;
   container.appendChild(message);
   container.scrollTop = container.scrollHeight;
+}
+
+// === Laad alle KB-bestanden bij het opstarten ===
+loadKnowledgeBase();
+
+async function loadKnowledgeBase() {
+  try {
+    const indexResponse = await fetch("kb_index.json");
+    const fileList = await indexResponse.json();
+
+    const allTextChunks = await Promise.all(
+      fileList.map(async (filename) => {
+        const res = await fetch(filename);
+        const text = await res.text();
+
+        if (filename.endsWith(".json")) {
+          const data = JSON.parse(text);
+          return formatJsonAsText(filename, data);
+        }
+
+        return `=== Inhoud van ${filename} ===\n` + text;
+      })
+    );
+
+    extraContext = allTextChunks.join("\n\n");
+
+  } catch (err) {
+    console.error("Fout bij laden van kennisbank:", err);
+    extraContext = "(Let op: de kennisbank kon niet geladen worden.)";
+  }
+}
+
+// Hulpfunctie om JSON bestanden beter leesbaar te maken
+function formatJsonAsText(filename, data) {
+  if (!Array.isArray(data)) return `=== ${filename} ===\n` + JSON.stringify(data, null, 2);
+
+  return `=== ${filename} ===\n` + data.map((item, i) =>
+    `# ${item.titel || "Item " + (i + 1)}\n` +
+    Object.entries(item).map(([k, v]) => `- ${k}: ${v}`).join("\n")
+  ).join("\n\n");
 }
