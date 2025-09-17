@@ -148,7 +148,9 @@ const EVADE_PHRASES = [
   "dat mag ik niet doen",
   "ik kan dit niet opzoeken",
   "ik kan niet browsen",
-  "als taalmodel kan ik dat niet"
+  "als taalmodel kan ik dat niet",
+  "onvoldoende informatie in de kennisbank",
+  "onvoldoende informatie"
 ];
 
 // Normaliseer tekst (lowercase + diacritics weg)
@@ -164,11 +166,12 @@ function detectEvasive(answer) {
   const matchedPhrases = EVADE_PHRASES.filter(p => txt.includes(normalizeNL(p)));
   const matchedWords = EVADE_WORDS.filter(w => txt.includes(normalizeNL(w)));
 
-  // drempel: 1 exacte frase OF minstens 2 losse woorden
-  const isEvasive = (matchedPhrases.length >= 1) || (matchedWords.length >= 2);
+  // drempel: 1 exacte frase OF minstens 1 los woord
+  const isEvasive = (matchedPhrases.length >= 1) || (matchedWords.length >= 1);
 
   return { isEvasive, matchedWords, matchedPhrases };
 }
+
 
 // Loggen naar Google Apps Script (CORS-vriendelijk: text/plain)
 async function logEvasive(question, answer, detection) {
