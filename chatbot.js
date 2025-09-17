@@ -1,7 +1,7 @@
 // === Instellingen ===
 const API_URL = "https://broad-king-6e2d.fredje4711.workers.dev";
 const MODEL = "gpt-4o";
-const LOG_URL = "https://script.google.com/macros/s/AKfycbyqANEKS6yX0PcNFzfkIUodcnUUtiwZl6w-rBItmzQtNvw9_Js5kjpV74bj1kZShVFD/exec"; // <--- VUL DIT IN
+const LOG_URL = "https://script.google.com/macros/s/AKfycbxDEbAjM7L-UvCSv3igZGqPmBSIwa_Q515b0fqMVJdxEtJTXW5CMT-nlpUREd1RFA1DBw/exec"; // <--- VUL DIT IN
 
 // System-prompt, uitgebreid om omzeilantwoorden te verminderen
 const SYSTEM_PROMPT = `Je bent een Nederlandstalige chatbot van de Diabetes Liga Midden-Limburg.
