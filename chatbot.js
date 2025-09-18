@@ -1,6 +1,9 @@
 // === Instellingen ===
 const API_URL = "https://broad-king-6e2d.fredje4711.workers.dev";
-const MODEL = "gpt-4o";
+
+// === Overschakeling naar GPT-3.5-turbo om limieten te vermijden ===
+const MODEL = "gpt-3.5-turbo";
+
 const LOG_URL = "https://script.google.com/macros/s/AKfycbzDpCXtkuNUXtd5pEyMZNqIKKcl7kqsaKxaZApQw7szDTOuAlHRwGNlgrcltp2yzIc8Lg/exec"; // <--- VUL DIT IN
 
 // System-prompt, uitgebreid om omzeilantwoorden te verminderen
