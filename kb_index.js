@@ -1,56 +1,74 @@
-let kennisbank = [];
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const question = input.value.trim();
+  if (!question) return;
 
-function zoekKennisbank(vraag) {
-  if (!vraag || !kennisbank.length) return [];
+  // Toon gebruikersvraag in de chat
+  const chat = document.getElementById("chat-box");
+  const userMessage = document.createElement("div");
+  userMessage.className = "message user-message";
+  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
+  chat.appendChild(userMessage);
+  input.value = "";
 
-  const stopwoorden = [
-    "de", "het", "een", "en", "of", "is", "zijn", "er", "in", "van", "wat", "welke", "hoe", "waar", "kan", "kunnen"
+  // 🔍 Zoek relevante fragmenten uit de kennisbank
+  const relevanteFragmenten = zoekKennisbank(question);
+
+  // 🧠 Maak systeeminstructie
+  const systemInstruction = `
+Je bent een hulpvaardige Nederlandstalige chatbot die alleen antwoorden geeft op basis van de kennisbankfragmenten hieronder.
+Als het antwoord niet terug te vinden is in de fragmenten, zeg dan letterlijk: "Niet gevonden in de kennisbank."
+
+Kennisbankfragmenten:
+${relevanteFragmenten.map((f, i) => `[${i + 1}] ${f.tekst}`).join('\n\n')}
+  `.trim();
+
+  // 📨 Bouw de messages payload
+  const messages = [
+    { role: "system", content: systemInstruction },
+    { role: "user", content: question }
   ];
 
-  const synoniemen = {
-    infosessie: ["informatiesessie", "sessie", "sessies", "infosessies"],
-    activiteit: ["activiteit", "activiteiten", "cultuur", "cultuuractiviteit"],
-    diabetesliga: ["diabetes liga", "diabetes liga vlaanderen"],
-    oktober: ["oktober", "15 oktober", "okt"],
-    november: ["november", "14 november", "nov"]
-  };
+  // ⏳ Laad-indicator
+  const loadingMessage = document.createElement("div");
+  loadingMessage.className = "message assistant-message loading";
+  loadingMessage.innerHTML = `<span class="icon">🤖</span><div class="loader"></div>`;
+  chat.appendChild(loadingMessage);
+  chat.scrollTop = chat.scrollHeight;
 
-  let woorden = vraag.toLowerCase().split(/\s+/)
-    .map(w => w.replace(/[.,!?]/g, '')) // leestekens verwijderen
-    .filter(w => !stopwoorden.includes(w));
-
-  // Voeg synoniemen toe aan de zoekwoorden
-  let trefwoorden = [...woorden];
-  woorden.forEach(w => {
-    Object.entries(synoniemen).forEach(([basis, lijst]) => {
-      if (lijst.includes(w) && !trefwoorden.includes(basis)) {
-        trefwoorden.push(basis);
-      }
+  try {
+    const response = await fetch("https://broad-king-6e2d.fredje4711.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages,
+        temperature: 0.3
+      })
     });
-  });
 
-  const resultaten = kennisbank.filter(f =>
-    f &&
-    typeof f.tekst === 'string' &&
-    trefwoorden.some(w => f.tekst.toLowerCase().includes(w))
-  );
+    const data = await response.json();
+    const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
 
-  const top10 = resultaten.sort((a, b) => a.tekst.length - b.tekst.length).slice(0, 10);
+    // ❌ Fallback als het niet gelukt is
+    if (!antwoord || antwoord.toLowerCase().includes("niet gevonden in de kennisbank")) {
+      console.warn("Geen antwoord gevonden op basis van fragmenten.");
+    }
 
-  console.log("🔎 Vraag:", vraag);
-  console.log("🔑 Sleutelwoorden:", trefwoorden);
-  console.log("📚 Gematchte fragmenten:", top10.map(f => f.titel || '(geen titel)'));
+    loadingMessage.remove();
 
-  return top10;
+    const assistantMessage = document.createElement("div");
+    assistantMessage.className = "message assistant-message";
+    assistantMessage.innerHTML = `<span class="icon">🤖</span><div>${antwoord}</div>`;
+    chat.appendChild(assistantMessage);
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch (err) {
+    console.error("Fout bij ophalen antwoord:", err);
+    loadingMessage.remove();
+    const errorMessage = document.createElement("div");
+    errorMessage.className = "message assistant-message error";
+    errorMessage.innerHTML = `<span class="icon">⚠️</span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
+    chat.appendChild(errorMessage);
+  }
 }
-
-// Laad kennisbank
-fetch("kb_index.json")
-  .then(res => res.json())
-  .then(data => {
-    kennisbank = data;
-    console.log("📥 Kennisbank geladen:", kennisbank.length, "fragmenten.");
-  })
-  .catch(err => {
-    console.error("❌ Fout bij laden van kennisbank:", err);
-  });
