@@ -1,22 +1,21 @@
-// 1. Globale variabele definiëren
 let kennisbank = [];
 
-// 2. Zoekfunctie gebruiken
 function zoekKennisbank(vraag) {
   if (!vraag || !kennisbank.length) return [];
 
-  const trefwoord = vraag.toLowerCase();
+  const trefwoorden = vraag.toLowerCase().split(/\s+/);
 
   const resultaten = kennisbank.filter(f =>
     f &&
     typeof f.tekst === 'string' &&
-    f.tekst.toLowerCase().includes(trefwoord)
+    trefwoorden.some(w => f.tekst.toLowerCase().includes(w))
   );
 
-  return resultaten.sort((a, b) => a.tekst.length - b.tekst.length);
+  // Sorteer op lengte en pak top 10
+  return resultaten.sort((a, b) => a.tekst.length - b.tekst.length).slice(0, 10);
 }
 
-// 3. Fetch uitvoeren om kennisbank-data in te laden
+// Laad kennisbank
 fetch("kb_index.json")
   .then(res => res.json())
   .then(data => {
