@@ -1,74 +1,41 @@
-async function sendMessage() {
-  const input = document.getElementById("chat-input");
-  const question = input.value.trim();
-  if (!question) return;
+// 1. Globale variabele voor de kennisbank
+let kennisbank = [];
 
-  // Toon gebruikersvraag in de chat
-  const chat = document.getElementById("chat-box");
-  const userMessage = document.createElement("div");
-  userMessage.className = "message user-message";
-  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
-  chat.appendChild(userMessage);
-  input.value = "";
+// 2. Zoekfunctie op basis van trefwoorden
+function zoekKennisbank(vraag) {
+  if (!vraag || !kennisbank.length) return [];
 
-  // 🔍 Zoek relevante fragmenten uit de kennisbank
-  const relevanteFragmenten = zoekKennisbank(question);
+  console.log("🔎 Vraag:", vraag);
 
-  // 🧠 Maak systeeminstructie
-  const systemInstruction = `
-Je bent een hulpvaardige Nederlandstalige chatbot die alleen antwoorden geeft op basis van de kennisbankfragmenten hieronder.
-Als het antwoord niet terug te vinden is in de fragmenten, zeg dan letterlijk: "Niet gevonden in de kennisbank."
+  // Verwerk de vraag in losse woorden
+  const woorden = vraag
+    .toLowerCase()
+    .replace(/[^\w\s]/gi, "")
+    .split(/\s+/)
+    .filter(w => w.length > 2 && w !== "voor" && w !== "met" && w !== "wat" && w !== "welke");
 
-Kennisbankfragmenten:
-${relevanteFragmenten.map((f, i) => `[${i + 1}] ${f.tekst}`).join('\n\n')}
-  `.trim();
+  console.log("🔑 Sleutelwoorden:", woorden);
 
-  // 📨 Bouw de messages payload
-  const messages = [
-    { role: "system", content: systemInstruction },
-    { role: "user", content: question }
-  ];
+  // Zoek naar fragmenten die minstens één van de sleutelwoorden bevatten
+  const resultaten = kennisbank.filter(f =>
+    f &&
+    typeof f.tekst === 'string' &&
+    woorden.some(w => f.tekst.toLowerCase().includes(w))
+  );
 
-  // ⏳ Laad-indicator
-  const loadingMessage = document.createElement("div");
-  loadingMessage.className = "message assistant-message loading";
-  loadingMessage.innerHTML = `<span class="icon">🤖</span><div class="loader"></div>`;
-  chat.appendChild(loadingMessage);
-  chat.scrollTop = chat.scrollHeight;
+  console.log("📚 Gematchte fragmenten:", resultaten.map(r => r.tekst));
 
-  try {
-    const response = await fetch("https://broad-king-6e2d.fredje4711.workers.dev/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages,
-        temperature: 0.3
-      })
-    });
-
-    const data = await response.json();
-    const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
-
-    // ❌ Fallback als het niet gelukt is
-    if (!antwoord || antwoord.toLowerCase().includes("niet gevonden in de kennisbank")) {
-      console.warn("Geen antwoord gevonden op basis van fragmenten.");
-    }
-
-    loadingMessage.remove();
-
-    const assistantMessage = document.createElement("div");
-    assistantMessage.className = "message assistant-message";
-    assistantMessage.innerHTML = `<span class="icon">🤖</span><div>${antwoord}</div>`;
-    chat.appendChild(assistantMessage);
-    chat.scrollTop = chat.scrollHeight;
-
-  } catch (err) {
-    console.error("Fout bij ophalen antwoord:", err);
-    loadingMessage.remove();
-    const errorMessage = document.createElement("div");
-    errorMessage.className = "message assistant-message error";
-    errorMessage.innerHTML = `<span class="icon">⚠️</span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
-    chat.appendChild(errorMessage);
-  }
+  // Geef maximaal 10 meest relevante (kortste eerst)
+  return resultaten.sort((a, b) => a.tekst.length - b.tekst.length).slice(0, 10);
 }
+
+// 3. Laad de kennisbank uit JSON-bestand
+fetch("kb_index.json")
+  .then(res => res.json())
+  .then(data => {
+    kennisbank = data;
+    console.log("📥 Kennisbank geladen:", kennisbank.length, "fragmenten.");
+  })
+  .catch(err => {
+    console.error("❌ Fout bij laden van kennisbank:", err);
+  });
