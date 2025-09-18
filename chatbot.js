@@ -34,7 +34,9 @@ async function sendMessage() {
     console.error(err);
   }
 
-  document.getElementById("chat-input").value = "";
+   const input = document.getElementById("chat-input");
+  if (input) input.value = "";
+
 }
 
 // ➤ Bericht toevoegen aan venster
