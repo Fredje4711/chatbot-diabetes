@@ -4,22 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Diabetes Chatbot – Testpagina</title>
-  <link rel="stylesheet" href="chatbot.css">
+  <style>
+    /* Eenvoudige styling (je kunt dit aanpassen naar je eigen css-bestand) */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    #chatbot-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+      text-align: center;
+      line-height: 60px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    #chatbot-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 350px;
+      max-height: 500px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    #chatbot-header {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    #chat-box {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .chat-message {
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 6px;
+      max-width: 80%;
+    }
+
+    .chat-message.user {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    .chat-message.bot {
+      background-color: #f1f0f0;
+      align-self: flex-start;
+    }
+
+    #chatbot-input-area {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+
+    #chat-input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    #chatbot-send {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Chatbotknop en venster -->
   <div id="chatbot-button">💬</div>
-  <div id="chatbot-container" style="display: none;">
-    <div id="chatbot-header">Chat met ons</div>
-    <div id="chatbot-messages"></div>
+
+  <div id="chatbot-container" style="display:none;">
+    <div id="chatbot-header">Stel je vraag over diabetes</div>
+    <div id="chat-box"></div>
     <div id="chatbot-input-area">
-      <input type="text" id="chatbot-input" placeholder="Typ je vraag..." />
+      <input type="text" id="chat-input" placeholder="Typ je vraag..." />
       <button id="chatbot-send" onclick="sendMessage()">▶</button>
     </div>
   </div>
 
   <script src="chatbot.js"></script>
+  <script>
+    // Toon/verberg chatvenster
+    document.getElementById("chatbot-button").addEventListener("click", function () {
+      const venster = document.getElementById("chatbot-container");
+      venster.style.display = venster.style.display === "none" ? "flex" : "none";
+    });
 
+    // Enter activeert versturen
+    document.getElementById("chat-input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 const API_URL = "https://broad-king-6e2d.fredje4711.workers.dev/";
 const MODEL = "gpt-3.5-turbo";
 
+// ➤ Bericht versturen naar GPT
 async function sendMessage() {
   const vraag = document.getElementById("chat-input").value;
   if (!vraag.trim()) return;
@@ -28,13 +29,15 @@ async function sendMessage() {
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content || "(Geen antwoord ontvangen)";
     toonBericht("bot", antwoord);
-    detecteerOmzeiling(vraag, antwoord);
   } catch (err) {
     toonBericht("bot", "Er is een fout opgetreden. Probeer opnieuw.");
     console.error(err);
   }
+
+  document.getElementById("chat-input").value = "";
 }
 
+// ➤ Bericht toevoegen aan venster
 function toonBericht(type, tekst) {
   const chatBox = document.getElementById("chat-box");
   const bericht = document.createElement("div");
@@ -44,8 +47,8 @@ function toonBericht(type, tekst) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// ➤ Prompt bouwen op basis van KB
 function maakPrompt(kbResultaten, vraag) {
-  // BEPERK het aantal fragmenten tot max 3 om tokens te beperken
   const MAX_FRAG = 3;
   const fragmenten = kbResultaten.slice(0, MAX_FRAG);
 
