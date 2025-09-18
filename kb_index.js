@@ -1,7 +1,7 @@
-// Maak globale variabele
+// 1. Globale variabele definiëren
 let kennisbank = [];
 
-// Functie om fragmenten te zoeken
+// 2. Zoekfunctie gebruiken
 function zoekKennisbank(vraag) {
   if (!vraag || !kennisbank.length) return [];
 
@@ -16,7 +16,7 @@ function zoekKennisbank(vraag) {
   return resultaten.sort((a, b) => a.tekst.length - b.tekst.length);
 }
 
-// Laad de JSON-index pas NA het definiëren van de functie
+// 3. Fetch uitvoeren om kennisbank-data in te laden
 fetch("kb_index.json")
   .then(res => res.json())
   .then(data => {
