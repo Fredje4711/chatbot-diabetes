@@ -1,0 +1,13 @@
+name = "diabetes-chatbot-worker"
+
+main = "worker.js" 
+
+compatibility_date = "2024-04-05"
+
+[vars]
+AI = "AI"
+
+[[r2_buckets]]
+binding = "KB_BUCKET"
+bucket_name = "kennisbank-dlml"
+

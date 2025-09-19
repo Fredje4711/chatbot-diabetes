@@ -41,7 +41,7 @@ ${relevanteFragmenten.map((f, i) => `[${i + 1}] ${f.tekst}`).join('\n\n')}
   chat.scrollTop = chat.scrollHeight;
 
   try {
-    const response = await fetch("https://broad-king-6e2d.fredje4711.workers.dev/", {
+    const response = await fetch("https://diabetes-chatbot-worker.fredje4711.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
