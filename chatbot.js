@@ -6,67 +6,45 @@ async function sendMessage() {
   // Toon gebruikersvraag in de chat
   const chat = document.getElementById("chat-box");
   const userMessage = document.createElement("div");
-  userMessage.className = "message user-message";
-  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
+  // Gebruik de class namen uit uw HTML/CSS voor de styling
+  userMessage.className = "chat-message user"; 
+  userMessage.textContent = question;
   chat.appendChild(userMessage);
   input.value = "";
 
-  // 🔍 Zoek relevante fragmenten uit de kennisbank
-  const relevanteFragmenten = zoekKennisbank(question);
-
-  // 🧠 Verbeterde GPT-instructie
-  const systemInstruction = `
-Je bent een behulpzame Nederlandstalige chatbot voor de Diabetes Liga Midden-Limburg.
-
-Je krijgt hieronder enkele tekstfragmenten uit de kennisbank. Beantwoord de gebruikersvraag **uitsluitend op basis van die fragmenten**.
-
-✅ Als er **ook maar één fragment** een mogelijk antwoord bevat, geef dat antwoord dan.  
-❌ Geef **geen extra uitleg of gissingen** buiten wat in de fragmenten staat.  
-🆘 Als er echt niets relevants bijzit, zeg dan letterlijk: **"Niet gevonden in de kennisbank."**
-
-Kennisbankfragmenten:
-${relevanteFragmenten.map((f, i) => `[${i + 1}] ${f.tekst}`).join('\n\n')}
-  `.trim();
-
-  const messages = [
-    { role: "system", content: systemInstruction },
-    { role: "user", content: question }
-  ];
-
   // Laadindicator
   const loadingMessage = document.createElement("div");
-  loadingMessage.className = "message assistant-message loading";
-  loadingMessage.innerHTML = `<span class="icon">🤖</span><div class="loader"></div>`;
+  loadingMessage.className = "chat-message bot";
+  loadingMessage.textContent = "..."; // Simple loading indicator
   chat.appendChild(loadingMessage);
   chat.scrollTop = chat.scrollHeight;
 
   try {
+    // Stuur ALLEEN de vraag naar de NIEUWE Worker URL
     const response = await fetch("https://diabetes-chatbot-worker.fredje4711.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o",
-        messages,
-        temperature: 0.3
+        question: question // Stuur een object met de key "question"
       })
     });
 
+    if (!response.ok) {
+        // Als de server een fout terugstuurt, toon die dan.
+        const errorText = await response.text();
+        throw new Error(`Serverfout: ${response.status} - ${errorText}`);
+    }
+
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
-    loadingMessage.remove();
-
-    const assistantMessage = document.createElement("div");
-    assistantMessage.className = "message assistant-message";
-    assistantMessage.innerHTML = `<span class="icon">🤖</span><div>${antwoord}</div>`;
-    chat.appendChild(assistantMessage);
+    
+    // Verwijder laadindicator en toon het echte antwoord
+    loadingMessage.textContent = antwoord;
     chat.scrollTop = chat.scrollHeight;
 
   } catch (err) {
     console.error("Fout bij ophalen antwoord:", err);
-    loadingMessage.remove();
-    const errorMessage = document.createElement("div");
-    errorMessage.className = "message assistant-message error";
-    errorMessage.innerHTML = `<span class="icon">⚠️</span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
-    chat.appendChild(errorMessage);
+    loadingMessage.textContent = `Er is een fout opgetreden: ${err.message}`;
+    loadingMessage.style.color = 'red';
   }
 }
