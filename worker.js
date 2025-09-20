@@ -45,21 +45,32 @@ const formatEventDetails = (e) => {
 
 const getCleanWords = (text) => new Set(text.toLowerCase().replace(/[.,!?;:"()]/g, "").split(/\s+/).filter(w => w.length > 2));
 
-// === FUNCTIES VOOR SPECIFIEKE DATA ===
+// === FINALE VERSIE - SPECIFIEKE ZOEKFUNCTIE ===
 function findSpecificAnswer(question) {
     const q = question.toLowerCase();
     
-    // Zoek naar contacten
+    // 1. Zoek naar contacten
+    // Trigger voor de volledige, gedetailleerde lijst
+    if (q.includes('alle bestuursleden') || q.includes('lijst van het bestuur') || q.includes('volledige gegevens bestuur')) {
+        const fullDetails = structuredData.contacts.map(c => {
+            return `${c.name} (${c.functions.join(', ')}):\n- E-mail: ${c.email}\n- Telefoon: ${c.phone}`;
+        }).join('\n\n');
+        return `Hier is de volledige lijst van de bestuursleden en hun contactgegevens:\n\n${fullDetails}`;
+    }
+
+    // Zoek naar een specifiek persoon
     for (const contact of structuredData.contacts) {
         if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
             return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}): E-mail: ${contact.email}, Telefoon: ${contact.phone}`;
         }
     }
+    
+    // Algemene vraag over het bestuur (korte versie)
     if (q.includes('bestuur') || q.includes('contact')) {
-        return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}.`;
+        return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}. Voor de volledige lijst, vraag "geef alle bestuursleden".`;
     }
 
-    // Zoek naar evenementen
+    // 2. Zoek naar evenementen (deze logica blijft hetzelfde)
     const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
     let targetMonth = months.find(m => q.includes(m));
     if (targetMonth) {
@@ -83,6 +94,7 @@ function findSpecificAnswer(question) {
 
     return null;
 }
+
 
 // === FUNCTIES VOOR SEMANTISCH ZOEKEN ===
 let kbEmbeddingsCache = {};
