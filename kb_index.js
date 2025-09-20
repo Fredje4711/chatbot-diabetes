@@ -1,35 +1,43 @@
-// 1. Globale variabele voor de kennisbank
+// ==== Verbeterde zoekfunctie voor de kennisbank ====
+
 let kennisbank = [];
 
-// 2. Zoekfunctie op basis van trefwoorden
 function zoekKennisbank(vraag) {
   if (!vraag || !kennisbank.length) return [];
 
-  console.log("🔎 Vraag:", vraag);
-
-  // Verwerk de vraag in losse woorden
-  const woorden = vraag
+  const trefwoorden = vraag
     .toLowerCase()
-    .replace(/[^\w\s]/gi, "")
+    .replace(/[.,!?;:"()]/g, "")
     .split(/\s+/)
-    .filter(w => w.length > 2 && w !== "voor" && w !== "met" && w !== "wat" && w !== "welke");
+    .filter(w => w.length > 2);
 
-  console.log("🔑 Sleutelwoorden:", woorden);
+  const belangrijkeWoorden = ["contact", "e-mailadres", "mail", "adres", "naam", "voorzitter", "covoorzitter", "penningmeester", "bestuur", "bestuursleden"];
 
-  // Zoek naar fragmenten die minstens één van de sleutelwoorden bevatten
-  const resultaten = kennisbank.filter(f =>
-    f &&
-    typeof f.tekst === 'string' &&
-    woorden.some(w => f.tekst.toLowerCase().includes(w))
-  );
+  const matchScore = (tekst) => {
+    let score = 0;
+    const txt = tekst.toLowerCase();
 
-  console.log("📚 Gematchte fragmenten:", resultaten.map(r => r.tekst));
+    // 1. Meer punten voor exacte trefwoorden
+    trefwoorden.forEach(w => {
+      if (txt.includes(w)) score += 1;
+    });
 
-  // Geef maximaal 10 meest relevante (kortste eerst)
-  return resultaten.sort((a, b) => a.tekst.length - b.tekst.length).slice(0, 10);
+    // 2. Extra punten voor belangrijke woorden
+    belangrijkeWoorden.forEach(w => {
+      if (txt.includes(w)) score += 2;
+    });
+
+    return score;
+  };
+
+  const resultaten = kennisbank
+    .map(f => ({ ...f, score: matchScore(f.tekst || "") }))
+    .filter(f => f.score > 0)
+    .sort((a, b) => b.score - a.score || a.tekst.length - b.tekst.length);
+
+  return resultaten;
 }
 
-// 3. Laad de kennisbank uit JSON-bestand
 fetch("kb_index.json")
   .then(res => res.json())
   .then(data => {
