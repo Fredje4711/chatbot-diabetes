@@ -52,7 +52,6 @@ function findSpecificAnswer(question) {
     const q = question.toLowerCase();
     const qWords = getCleanWords(question);
 
-    // 1. Zoek naar contacten
     for (const contact of structuredData.contacts) {
         if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
             return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}): E-mail: ${contact.email}, Telefoon: ${contact.phone}`;
@@ -62,7 +61,6 @@ function findSpecificAnswer(question) {
         return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}.`;
     }
 
-    // 2. Zoek naar evenementen
     const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
     let targetMonth = months.find(m => q.includes(m));
     if (targetMonth) {
@@ -74,20 +72,20 @@ function findSpecificAnswer(question) {
     const scoredEvents = structuredData.events.map(event => {
         const titleWords = getCleanWords(event.titel);
         let score = 0;
+        let hasEventKeyword = false;
         qWords.forEach(qw => {
-            if (titleWords.has(qw)) score++;
+            if (titleWords.has(qw)) {
+                score++;
+                if (['fietstocht', 'ledenfeest', 'wandeling', 'uitstap', 'praatcafe'].includes(qw)) hasEventKeyword = true;
+            }
         });
+        // Geef een extra boost als een duidelijk evenement-woord wordt gebruikt
+        if (hasEventKeyword) score += 2;
         return { ...event, score };
     }).filter(e => e.score > 0).sort((a, b) => b.score - a.score);
 
-    if (scoredEvents.length > 0 && scoredEvents[0].score > 1) { // We hebben een goede match
-        if (scoredEvents.length === 1 || scoredEvents[0].score > scoredEvents[1].score) {
-            // Als er 1 duidelijke beste match is
-            return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
-        } else {
-            // Als er meerdere even goede matches zijn
-            return `Ik heb meerdere evenementen gevonden die overeenkomen met uw vraag:\n\n${scoredEvents.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}\n\nStel een vraag over een specifiek evenement voor meer details.`;
-        }
+    if (scoredEvents.length > 0 && scoredEvents[0].score >= 1) {
+        return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
     }
     
     const eventKeywords = ['activiteit', 'infosessie', 'evenementen'];
@@ -95,7 +93,7 @@ function findSpecificAnswer(question) {
          return `Hier is een overzicht van alle geplande evenementen:\n\n${structuredData.events.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
     }
 
-    return null; // Geen specifieke match gevonden
+    return null;
 }
 
 function findGeneralAnswerContext(question, kbData) {
@@ -111,7 +109,6 @@ function findGeneralAnswerContext(question, kbData) {
 
     const bestMatch = scoredItems.sort((a, b) => b.score - a.score)[0];
     
-    // Alleen als de match goed genoeg is, sturen we de context door
     if (bestMatch && bestMatch.score > 0) {
         return bestMatch.tekst;
     }
@@ -140,7 +137,8 @@ export default {
                 
                 const context = findGeneralAnswerContext(question, kbData);
                 
-                const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker KORT en ALLEEN op basis van de onderstaande CONTEXT. Als de context "Geen relevante informatie gevonden." is, of als het antwoord echt niet in de context staat, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
+                // AANGEPASTE PROMPT: Vraag om de tekst letterlijk te gebruiken.
+                const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker. Gebruik de onderstaande CONTEXT om het antwoord te formuleren. Geef de informatie uit de context zo letterlijk mogelijk weer. Vat niet onnodig samen. Als de context "Geen relevante informatie gevonden." is, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
                 const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
                 finalAnswer = aiResponse.response;
