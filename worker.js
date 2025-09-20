@@ -61,7 +61,15 @@ export default {
             const context = await findSemanticBestMatches(question, kbData, env);
             
             const ai = env.AI;
-            const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker. Gebruik de onderstaande CONTEXT om het antwoord te formuleren. Als de CONTEXT relevante informatie bevat, baseer je antwoord dan VOLLEDIG op die context. Als het antwoord niet in de context staat, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
+            const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg.
+
+**Regel 1:** Als de CONTEXT hieronder relevante informatie bevat om de vraag van de gebruiker te beantwoorden, baseer je antwoord dan **volledig en uitsluitend** op die context.
+
+**Regel 2:** Als de CONTEXT "Geen relevante informatie gevonden." is, of als de context de vraag echt niet kan beantwoorden, gebruik dan je **algemene kennis** om een behulpzaam antwoord te geven. Vermeld in dat geval dat de informatie van algemene aard is, bijvoorbeeld door te starten met: "Op basis van algemene informatie...".
+
+**Regel 3:** Wees altijd vriendelijk en behulpzaam.
+
+CONTEXT: ${context}`;
             const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
             const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
             
