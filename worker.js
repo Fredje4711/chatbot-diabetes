@@ -100,13 +100,24 @@ function findSpecificAnswer(question) {
     return null;
 }
 
+// === ALLERLAATSTE, MEEST ROBUUSTE ALGEMENE ZOEKFUNCTIE ===
 function findGeneralAnswerContext(question, kbData) {
     const qWords = getCleanWords(question);
+    
     const scoredItems = kbData.map(item => {
         const titleWords = getCleanWords(item.titel || "");
+        const textWords = getCleanWords(item.tekst || "");
+        
         let score = 0;
         qWords.forEach(qw => {
-            if (titleWords.has(qw)) score += 1;
+            // Hoge score voor match in de titel
+            if (titleWords.has(qw)) {
+                score += 5; 
+            }
+            // Lagere score voor match in de tekst zelf
+            else if (textWords.has(qw)) {
+                score += 1;
+            }
         });
         return { ...item, score };
     });
