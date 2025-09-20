@@ -48,10 +48,12 @@ const getCleanWords = (text) => new Set(text.toLowerCase().replace(/[.,!?;:"()]/
 
 // === ZOEKFUNCTIES ===
 
+// === NIEUWE, VEILIGERE SPECIFIEKE ZOEKFUNCTIE ===
 function findSpecificAnswer(question) {
     const q = question.toLowerCase();
     const qWords = getCleanWords(question);
 
+    // 1. Zoek naar contacten (deze logica is prima)
     for (const contact of structuredData.contacts) {
         if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
             return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}): E-mail: ${contact.email}, Telefoon: ${contact.phone}`;
@@ -61,6 +63,7 @@ function findSpecificAnswer(question) {
         return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}.`;
     }
 
+    // 2. Zoek naar evenementen (DEZE LOGICA IS VOLLEDIG HERSCHREVEN)
     const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
     let targetMonth = months.find(m => q.includes(m));
     if (targetMonth) {
@@ -69,30 +72,31 @@ function findSpecificAnswer(question) {
         return `Voor ${targetMonth} heb ik de volgende evenementen gevonden:\n\n` + monthEvents.map(e => formatEventDetails(e)).join('\n\n');
     }
 
+    // Score berekenen voor evenementen
     const scoredEvents = structuredData.events.map(event => {
         const titleWords = getCleanWords(event.titel);
         let score = 0;
-        let hasEventKeyword = false;
         qWords.forEach(qw => {
             if (titleWords.has(qw)) {
                 score++;
-                if (['fietstocht', 'ledenfeest', 'wandeling', 'uitstap', 'praatcafe'].includes(qw)) hasEventKeyword = true;
             }
         });
-        // Geef een extra boost als een duidelijk evenement-woord wordt gebruikt
-        if (hasEventKeyword) score += 2;
         return { ...event, score };
     }).filter(e => e.score > 0).sort((a, b) => b.score - a.score);
 
-    if (scoredEvents.length > 0 && scoredEvents[0].score >= 1) {
+    // *** DE BELANGRIJKE WIJZIGING ***
+    // Alleen als er een HELE GOEDE match is (minstens 2 woorden overeenkomst), beschouwen we het als een evenement-vraag.
+    if (scoredEvents.length > 0 && scoredEvents[0].score >= 2) { 
         return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
     }
     
+    // Alleen triggeren op "alle activiteiten" als er geen specifieke match is
     const eventKeywords = ['activiteit', 'infosessie', 'evenementen'];
     if (eventKeywords.some(kw => q.includes(kw))) {
          return `Hier is een overzicht van alle geplande evenementen:\n\n${structuredData.events.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
     }
 
+    // Als geen van de bovenstaande strikte regels een match geeft, is het GEEN specifieke vraag.
     return null;
 }
 
