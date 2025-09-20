@@ -72,3 +72,73 @@
   padding: 10px 15px;
   cursor: pointer;
 }
+/* === VOEG DEZE NIEUWE REGELS TOE VOOR DE CHATBUBBELS === */
+
+/* Algemene stijl voor elke chatbubbel-container */
+.message {
+  display: flex;
+  align-items: flex-start; /* Zorgt dat icoon en tekst bovenaan uitlijnen */
+  margin: 10px 0;
+  max-width: 85%;
+  line-height: 1.4;
+}
+
+/* Stijl voor de div die de tekst bevat */
+.message div {
+  padding: 10px 12px;
+  border-radius: 18px;
+  word-wrap: break-word; /* Zorgt dat lange woorden afbreken */
+}
+
+/* Stijl voor het icoontje (de emoji) */
+.message .icon {
+  width: 32px;
+  height: 32px;
+  line-height: 32px; /* Centreert de emoji verticaal */
+  text-align: center;
+  border-radius: 50%;
+  flex-shrink: 0; /* Zorgt dat het icoon niet kleiner wordt */
+  margin-right: 8px;
+}
+
+/* Specifieke stijlen voor berichten van de GEBRUIKER */
+.user-message {
+  margin-left: auto; /* Duwt de bubbel naar rechts */
+  flex-direction: row-reverse; /* Draait de volgorde om: eerst tekst, dan icoon */
+}
+.user-message .icon {
+  margin-left: 8px; /* Ruimte aan de linkerkant van het icoon */
+  margin-right: 0;
+  background: #007bff;
+  color: white;
+}
+.user-message div {
+  background-color: #dcf8c6; /* Groene bubbel */
+  border-bottom-right-radius: 4px; /* Geeft het een 'speech bubble' effect */
+}
+
+/* Specifieke stijlen voor berichten van de BOT */
+.assistant-message {
+  margin-right: auto; /* Houdt de bubbel links */
+}
+.assistant-message .icon {
+  background: #e9e9eb;
+}
+.assistant-message div {
+  background-color: #f1f0f0; /* Grijze bubbel */
+  border-bottom-left-radius: 4px; /* Geeft het een 'speech bubble' effect */
+}
+
+/* Laad-animatie (optioneel maar mooi) */
+.loader {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1.5s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
