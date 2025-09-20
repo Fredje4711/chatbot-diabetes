@@ -4,12 +4,15 @@ async function sendMessage() {
   if (!question) return;
 
   const chat = document.getElementById("chat-box");
+
+  // HERSTELDE OUDE OPMAAK VOOR DE GEBRUIKERSBUBBEL
   const userMessage = document.createElement("div");
-  userMessage.className = "message user-message";
+  userMessage.className = "message user-message"; // Gebruik de class namen uit uw CSS
   userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
   chat.appendChild(userMessage);
   input.value = "";
 
+  // Laadindicator met de correcte opmaak
   const loadingMessage = document.createElement("div");
   loadingMessage.className = "message assistant-message loading";
   loadingMessage.innerHTML = `<span class="icon">🤖</span><div class="loader"></div>`;
@@ -32,15 +35,14 @@ async function sendMessage() {
 
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
-    
-    // DE NIEUWE REGEL: Vervang regeleindes door <br> tags voor correcte weergave in HTML
     const formattedAntwoord = antwoord.replace(/\n/g, '<br>');
 
+    // Verwijder de laadindicator
     loadingMessage.remove();
 
+    // HERSTELDE OUDE OPMAAK VOOR DE BOT-BUBBEL
     const assistantMessage = document.createElement("div");
     assistantMessage.className = "message assistant-message";
-    // GEBRUIK DE NIEUWE VARIABELE HIER
     assistantMessage.innerHTML = `<span class="icon">🤖</span><div>${formattedAntwoord}</div>`;
     chat.appendChild(assistantMessage);
     chat.scrollTop = chat.scrollHeight;
@@ -48,6 +50,7 @@ async function sendMessage() {
   } catch (err) {
     console.error("Fout bij ophalen antwoord:", err);
     loadingMessage.remove();
+    // Foutmelding met de correcte opmaak
     const errorMessage = document.createElement("div");
     errorMessage.className = "message assistant-message error";
     errorMessage.innerHTML = `<span class="icon">⚠️</span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
