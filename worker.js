@@ -1,4 +1,4 @@
-// === MINI-DATABASE (VOLLEDIGE VERSIE) ===
+// === MINI-DATABASE (voor contacten en evenementen) ===
 const structuredData = {
     contacts: [
         { name: "Guido Smets", functions: ["Covoorzitter", "Penningmeester"], email: "guido.smets4@telenet.be", phone: "0474 32 44 14" },
@@ -28,7 +28,6 @@ const structuredData = {
 };
 
 // === HULPFUNCTIES ===
-
 const formatEventDetails = (e) => {
     let details = [`Titel: ${e.titel}`, `Datum: ${e.datum}`, `Tijd: ${e.tijd}`, `Locatie: ${e.locatie}`, `Prijs: ${e.prijs}`];
     if (e.spreker) details.push(`Spreker: ${e.spreker}`);
@@ -46,14 +45,11 @@ const formatEventDetails = (e) => {
 
 const getCleanWords = (text) => new Set(text.toLowerCase().replace(/[.,!?;:"()]/g, "").split(/\s+/).filter(w => w.length > 2));
 
-// === ZOEKFUNCTIES ===
-
-// === NIEUWE, VEILIGERE SPECIFIEKE ZOEKFUNCTIE ===
+// === FUNCTIES VOOR SPECIFIEKE DATA ===
 function findSpecificAnswer(question) {
     const q = question.toLowerCase();
-    const qWords = getCleanWords(question);
-
-    // 1. Zoek naar contacten (deze logica is prima)
+    
+    // Zoek naar contacten
     for (const contact of structuredData.contacts) {
         if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
             return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}): E-mail: ${contact.email}, Telefoon: ${contact.phone}`;
@@ -63,7 +59,7 @@ function findSpecificAnswer(question) {
         return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}.`;
     }
 
-    // 2. Zoek naar evenementen (DEZE LOGICA IS VOLLEDIG HERSCHREVEN)
+    // Zoek naar evenementen
     const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
     let targetMonth = months.find(m => q.includes(m));
     if (targetMonth) {
@@ -72,72 +68,74 @@ function findSpecificAnswer(question) {
         return `Voor ${targetMonth} heb ik de volgende evenementen gevonden:\n\n` + monthEvents.map(e => formatEventDetails(e)).join('\n\n');
     }
 
-    // Score berekenen voor evenementen
     const scoredEvents = structuredData.events.map(event => {
         const titleWords = getCleanWords(event.titel);
         let score = 0;
-        qWords.forEach(qw => {
-            if (titleWords.has(qw)) {
-                score++;
-            }
+        getCleanWords(question).forEach(qw => {
+            if (titleWords.has(qw)) score++;
         });
         return { ...event, score };
     }).filter(e => e.score > 0).sort((a, b) => b.score - a.score);
 
-    // *** DE BELANGRIJKE WIJZIGING ***
-    // Alleen als er een HELE GOEDE match is (minstens 2 woorden overeenkomst), beschouwen we het als een evenement-vraag.
-    if (scoredEvents.length > 0 && scoredEvents[0].score >= 2) { 
+    if (scoredEvents.length > 0 && scoredEvents[0].score >= 2) {
         return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
     }
-    
-    // Alleen triggeren op "alle activiteiten" als er geen specifieke match is
-    const eventKeywords = ['activiteit', 'infosessie', 'evenementen'];
-    if (eventKeywords.some(kw => q.includes(kw))) {
-         return `Hier is een overzicht van alle geplande evenementen:\n\n${structuredData.events.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
-    }
 
-    // Als geen van de bovenstaande strikte regels een match geeft, is het GEEN specifieke vraag.
     return null;
 }
 
-// === ALLERLAATSTE, MEEST ROBUUSTE ALGEMENE ZOEKFUNCTIE ===
-function findGeneralAnswerContext(question, kbData) {
-    const qWords = getCleanWords(question);
-    
-    const scoredItems = kbData.map(item => {
-        const titleWords = getCleanWords(item.titel || "");
-        const textWords = getCleanWords(item.tekst || "");
-        
-        let score = 0;
-        qWords.forEach(qw => {
-            // Hoge score voor match in de titel
-            if (titleWords.has(qw)) {
-                score += 5; 
-            }
-            // Lagere score voor match in de tekst zelf
-            else if (textWords.has(qw)) {
-                score += 1;
-            }
-        });
-        return { ...item, score };
-    });
+// === FUNCTIES VOOR SEMANTISCH ZOEKEN ===
+let kbEmbeddingsCache = {};
 
-    const bestMatch = scoredItems.sort((a, b) => b.score - a.score)[0];
+async function findSemanticBestMatch(question, kbData, env) {
+    const cacheKey = "all_titles";
+    if (!kbEmbeddingsCache[cacheKey]) {
+        console.log("Aanmaken van kennisbank-embeddings cache...");
+        const titles = kbData.map(item => item.titel || "");
+        const response = await fetch("https://api.openai.com/v1/embeddings", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ input: titles, model: "text-embedding-ada-002" }),
+        });
+        if (!response.ok) throw new Error("Kon geen embeddings voor de kennisbank ophalen.");
+        const { data } = await response.json();
+        kbEmbeddingsCache[cacheKey] = data.map(d => d.embedding);
+        console.log("Cache aangemaakt.");
+    }
+    const questionResponse = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ input: question, model: "text-embedding-ada-002" }),
+    });
+    if (!questionResponse.ok) throw new Error("Kon geen embedding voor de vraag ophalen.");
+    const { data: questionData } = await questionResponse.json();
+    const questionEmbedding = questionData[0].embedding;
     
-    if (bestMatch && bestMatch.score > 0) {
-        return bestMatch.tekst;
+    let bestMatch = { score: -1, index: -1 };
+    for (let i = 0; i < kbEmbeddingsCache[cacheKey].length; i++) {
+        let dotProduct = 0, normA = 0, normB = 0;
+        for (let j = 0; j < questionEmbedding.length; j++) {
+            dotProduct += questionEmbedding[j] * kbEmbeddingsCache[cacheKey][i][j];
+            normA += questionEmbedding[j] ** 2;
+            normB += kbEmbeddingsCache[cacheKey][i][j] ** 2;
+        }
+        const score = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        if (score > bestMatch.score) {
+            bestMatch = { score, index: i };
+        }
+    }
+    if (bestMatch.score > 0.8) {
+        return kbData[bestMatch.index].tekst;
     }
     return "Geen relevante informatie gevonden.";
 }
 
 // === HOOFDFUNCTIE VAN DE WORKER ===
-
 export default {
     async fetch(request, env) {
         const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
         if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
         if (request.method !== 'POST') return new Response('Methode niet toegestaan', { status: 405, headers: corsHeaders });
-
         try {
             const { question } = await request.json();
             if (!question) return new Response('Vraag ontbreekt.', { status: 400, headers: corsHeaders });
@@ -145,14 +143,13 @@ export default {
             let finalAnswer = findSpecificAnswer(question);
 
             if (!finalAnswer) {
-                const ai = env.AI;
                 const object = await env.KB_BUCKET.get('kb_index.json');
                 if (object === null) throw new Error('Kennisbank niet gevonden.');
                 const kbData = await object.json();
                 
-                const context = findGeneralAnswerContext(question, kbData);
+                const context = await findSemanticBestMatch(question, kbData, env);
                 
-                // AANGEPASTE PROMPT: Vraag om de tekst letterlijk te gebruiken.
+                const ai = env.AI;
                 const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker. Gebruik de onderstaande CONTEXT om het antwoord te formuleren. Geef de informatie uit de context zo letterlijk mogelijk weer. Vat niet onnodig samen. Als de context "Geen relevante informatie gevonden." is, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
                 const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
