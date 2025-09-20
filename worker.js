@@ -44,78 +44,78 @@ const formatEventDetails = (e) => {
     return details.join('\n');
 };
 
-// === ROUTER & ZOEKFUNCTIES ===
+const getCleanWords = (text) => new Set(text.toLowerCase().replace(/[.,!?;:"()]/g, "").split(/\s+/).filter(w => w.length > 2));
 
-function handleContactQuestion(question) {
+// === ZOEKFUNCTIES ===
+
+function findSpecificAnswer(question) {
     const q = question.toLowerCase();
-    let results = [];
-    if (!q.includes('contact') && !q.includes('bestuur') && !structuredData.contacts.some(c => q.includes(c.name.toLowerCase().split(' ')[0]))) {
-        return null;
-    }
+    const qWords = getCleanWords(question);
+
+    // 1. Zoek naar contacten
     for (const contact of structuredData.contacts) {
-        if (q.includes(contact.name.toLowerCase().split(' ')[0])) { results.push(contact); }
-    }
-    if (results.length > 0) {
-        return `Hier zijn de gegevens die ik kon vinden: ${results.map(c => `${c.name} (${c.functions.join(', ')}): E-mail: ${c.email}, Telefoon: ${c.phone}`).join('. ')}`;
+        if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
+            return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}): E-mail: ${contact.email}, Telefoon: ${contact.phone}`;
+        }
     }
     if (q.includes('bestuur') || q.includes('contact')) {
         return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}.`;
     }
-    return null;
-}
 
-function handleEventQuestion(question) {
-    const q = question.toLowerCase();
+    // 2. Zoek naar evenementen
     const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
-    const eventKeywords = ['activiteit', 'infosessie', 'evenement', 'wat is er te doen'];
-    
-    let isEventQuestion = eventKeywords.some(kw => q.includes(kw)) || months.some(m => q.includes(m));
-    if (!isEventQuestion) return null;
-
     let targetMonth = months.find(m => q.includes(m));
     if (targetMonth) {
         const monthEvents = structuredData.events.filter(e => e.datum.toLowerCase().includes(targetMonth));
         if (monthEvents.length === 0) return `Ik kon geen evenementen vinden voor de maand ${targetMonth}.`;
-        return `Voor ${targetMonth} heb ik de volgende evenementen gevonden:\n\n${monthEvents.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
+        return `Voor ${targetMonth} heb ik de volgende evenementen gevonden:\n\n` + monthEvents.map(e => formatEventDetails(e)).join('\n\n');
     }
 
-    const searchWords = q.replace(/[.,!?;:"()]/g, "").split(/\s+/).filter(w => w.length > 3);
     const scoredEvents = structuredData.events.map(event => {
+        const titleWords = getCleanWords(event.titel);
         let score = 0;
-        const titleWords = event.titel.toLowerCase().split(/\s+/);
-        searchWords.forEach(sw => {
-            if (titleWords.some(tw => tw.includes(sw))) score++;
+        qWords.forEach(qw => {
+            if (titleWords.has(qw)) score++;
         });
         return { ...event, score };
     }).filter(e => e.score > 0).sort((a, b) => b.score - a.score);
 
-    if (scoredEvents.length === 1) {
-        return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
-    }
-    if (scoredEvents.length > 1) {
-        return `Ik heb meerdere evenementen gevonden die overeenkomen met uw vraag:\n\n${scoredEvents.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}\n\nStel een vraag over een specifiek evenement voor meer details.`;
+    if (scoredEvents.length > 0 && scoredEvents[0].score > 1) { // We hebben een goede match
+        if (scoredEvents.length === 1 || scoredEvents[0].score > scoredEvents[1].score) {
+            // Als er 1 duidelijke beste match is
+            return `Hier zijn de details voor het evenement:\n\n${formatEventDetails(scoredEvents[0])}`;
+        } else {
+            // Als er meerdere even goede matches zijn
+            return `Ik heb meerdere evenementen gevonden die overeenkomen met uw vraag:\n\n${scoredEvents.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}\n\nStel een vraag over een specifiek evenement voor meer details.`;
+        }
     }
     
-    if (isEventQuestion) {
-        return `Hier is een overzicht van alle geplande evenementen:\n\n${structuredData.events.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
+    const eventKeywords = ['activiteit', 'infosessie', 'evenementen'];
+    if (eventKeywords.some(kw => q.includes(kw))) {
+         return `Hier is een overzicht van alle geplande evenementen:\n\n${structuredData.events.map(e => `- ${e.type} '${e.titel}' op ${e.datum}`).join('\n')}`;
     }
 
-    return null;
+    return null; // Geen specifieke match gevonden
 }
 
-function findRelevantKbItems(question, kbData, topK = 3) {
-    const questionWords = new Set(question.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+function findGeneralAnswerContext(question, kbData) {
+    const qWords = getCleanWords(question);
     const scoredItems = kbData.map(item => {
-        const titleWords = new Set((item.titel || "").toLowerCase().split(/\s+/));
-        const textWords = new Set((item.tekst || "").toLowerCase().split(/\s+/));
+        const titleWords = getCleanWords(item.titel || "");
         let score = 0;
-        for (const word of questionWords) {
-            if (titleWords.has(word)) score += 2;
-            if (textWords.has(word)) score += 1;
-        }
+        qWords.forEach(qw => {
+            if (titleWords.has(qw)) score += 1;
+        });
         return { ...item, score };
     });
-    return scoredItems.filter(item => item.score > 0).sort((a, b) => b.score - a.score).slice(0, topK);
+
+    const bestMatch = scoredItems.sort((a, b) => b.score - a.score)[0];
+    
+    // Alleen als de match goed genoeg is, sturen we de context door
+    if (bestMatch && bestMatch.score > 0) {
+        return bestMatch.tekst;
+    }
+    return "Geen relevante informatie gevonden.";
 }
 
 // === HOOFDFUNCTIE VAN DE WORKER ===
@@ -130,19 +130,17 @@ export default {
             const { question } = await request.json();
             if (!question) return new Response('Vraag ontbreekt.', { status: 400, headers: corsHeaders });
 
-            let specificAnswer = handleContactQuestion(question) || handleEventQuestion(question);
-            let finalAnswer;
+            let finalAnswer = findSpecificAnswer(question);
 
-            if (specificAnswer) {
-                finalAnswer = specificAnswer;
-            } else {
+            if (!finalAnswer) {
                 const ai = env.AI;
                 const object = await env.KB_BUCKET.get('kb_index.json');
                 if (object === null) throw new Error('Kennisbank niet gevonden.');
                 const kbData = await object.json();
-                const relevantItems = findRelevantKbItems(question, kbData);
-                const context = relevantItems.length > 0 ? relevantItems.map(item => item.tekst).join('\n\n---\n\n') : "Geen relevante informatie gevonden.";
-                const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker KORT en ALLEEN op basis van de onderstaande CONTEXT. Als het antwoord niet in de context staat, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
+                
+                const context = findGeneralAnswerContext(question, kbData);
+                
+                const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg. Beantwoord de vraag van de gebruiker KORT en ALLEEN op basis van de onderstaande CONTEXT. Als de context "Geen relevante informatie gevonden." is, of als het antwoord echt niet in de context staat, zeg dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Geef direct het antwoord. CONTEXT: ${context}`;
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
                 const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
                 finalAnswer = aiResponse.response;
