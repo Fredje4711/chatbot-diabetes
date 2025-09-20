@@ -1,3 +1,8 @@
+
+body {
+  background-color: red !important;
+}
+
 /* Stijl voor de chatknop */
 #chatbot-button {
   position: fixed;
@@ -141,7 +146,4 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-body {
-  background-color: red !important;
 }
