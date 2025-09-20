@@ -95,7 +95,6 @@ function findSpecificAnswer(question) {
     return null;
 }
 
-
 // === FUNCTIES VOOR SEMANTISCH ZOEKEN ===
 let kbEmbeddingsCache = {};
 
