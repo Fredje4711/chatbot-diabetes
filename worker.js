@@ -14,11 +14,17 @@ const structuredData = {
 
 // === ZOEKFUNCTIES ===
 
-// Deze functie geeft een GEGARANDEERD correct antwoord voor contact-vragen.
+// === VERBETERDE FUNCTIE VOOR ALLE CONTACT-GERELATEERDE VRAGEN ===
 function findContactAnswer(question) {
     const q = question.toLowerCase();
     
-    // Trigger voor de volledige, gedetailleerde lijst
+    // 1. Specifieke trigger voor Sociale Media
+    const socialMediaTriggers = ['sociale media', 'facebook', 'instagram', 'youtube'];
+    if (socialMediaTriggers.some(trigger => q.includes(trigger))) {
+        return `U kunt ons vinden op de volgende sociale media:\n\n- Facebook: https://www.facebook.com/p/Diabetes-Liga-Midden-Limburg-100091325418693\n- Instagram: https://www.instagram.com/diabetes_liga_midden_limburg/\n- YouTube: https://www.youtube.com/@Diabetesligamiddenlimburg`;
+    }
+
+    // 2. Trigger voor de volledige, gedetailleerde lijst van het bestuur
     const fullListTriggers = ['alle bestuursleden', 'lijst van het bestuur', 'volledige gegevens bestuur', 'alle contactgegevens'];
     if (fullListTriggers.some(trigger => q.includes(trigger))) {
         const fullDetails = structuredData.contacts.map(c => {
@@ -27,21 +33,20 @@ function findContactAnswer(question) {
         return `Hier is de volledige lijst van de bestuursleden en hun contactgegevens:\n\n${fullDetails}`;
     }
 
-    // Zoek naar een specifiek persoon
+    // 3. Zoek naar een specifiek persoon
     for (const contact of structuredData.contacts) {
         if (q.includes(contact.name.toLowerCase().split(' ')[0])) {
             return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}):\n- E-mail: ${contact.email}\n- Telefoon: ${contact.phone}`;
         }
     }
     
-    // Algemene vraag over het bestuur (korte versie)
+    // 4. Algemene vraag over het bestuur (korte versie)
     if (q.includes('bestuur') || q.includes('contact')) {
-        return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Voor de volledige lijst, vraag bijvoorbeeld "geef alle bestuursleden".`;
+        return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}. Het algemene e-mailadres is ${structuredData.general.email}. Voor de volledige lijst, vraag bijvoorbeeld "geef alle bestuursleden".`;
     }
 
     return null; // Geen contactvraag
 }
-
 // Semantische zoekfunctie voor de algemene kennisbank
 let kbEmbeddingsCache = {};
 async function findSemanticBestMatches(question, kbData, env, topK = 3) {
