@@ -6,34 +6,41 @@
   <title>Diabetes Chatbot – Testpagina</title>
 
     <style>
-	
-	/* === NIEUWE STYLING VOOR DE LANDINGSPAGINA-LOOK === */
-.page-header {
-  background-color: #007bff; /* Blauwe achtergrond */
-  color: white;
-  text-align: center;
-  padding: 50px 20px;
-}
-.header-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
-.header-logo {
-  width: 60px; /* Grootte van het logo in de header */
-  height: 60px;
-  margin-bottom: 15px;
-}
-.page-header h1 {
-  margin: 0;
-  font-size: 2.5em; /* Grotere titel */
-}
-.page-header p {
-  font-size: 1.2em;
-  opacity: 0.9;
-}
-	
-      /* --- ALGEMENE CONTAINER STYLING --- */
-      body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+      /* --- ALGEMENE STYLING & LANDINGSPAGINA LOOK --- */
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; padding: 0; background-color: #f9f9f9; }
+      
+      .page-header {
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        padding: 25px 20px; /* Verlaagde header */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .header-content h1 {
+        margin: 0;
+        font-size: 2em;
+      }
+      .header-content p {
+        margin: 5px 0 0;
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .intro-content { 
+        max-width: 800px; /* Maximale breedte voor de tekst */
+        margin: 40px auto;  /* Centreert de tekst horizontaal */
+        padding: 20px; 
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        line-height: 1.7; 
+      }
+      .intro-content h1 { color: #0056b3; font-size: 1.8em; }
+      .intro-content h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 30px; }
+      .intro-content code { background-color: #e9e9eb; padding: 3px 7px; border-radius: 4px; font-family: monospace; }
+      .intro-content ol, .intro-content ul { padding-left: 20px; }
+
+      /* --- CHATBOT STYLING (ongewijzigd) --- */
       #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
       #chatbot-container { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; border: 1px solid #ccc; border-radius: 10px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 1000; }
       #chatbot-header { background-color: #007bff; color: white; padding: 10px; font-weight: bold; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
@@ -41,88 +48,42 @@
       #chatbot-input-area { display: flex; border-top: 1px solid #ccc; }
       #chat-input { flex: 1; border: none; padding: 10px; font-size: 14px; }
       #chatbot-send { background-color: #007bff; color: white; border: none; padding: 0 16px; cursor: pointer; }
-
-      /* --- DEFINITIEVE STYLING VOOR DE BUBBELS EN ICONEN --- */
+      
       .message { display: flex; align-items: flex-start; margin: 10px 0; max-width: 85%; line-height: 1.4; }
       .message div { padding: 10px 12px; border-radius: 18px; word-wrap: break-word; }
-      
-      .message .icon {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0;
-        margin-right: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        border-radius: 50%;
-        overflow: hidden;
-      }
+      .message .icon { width: 32px; height: 32px; flex-shrink: 0; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 50%; overflow: hidden; }
       .message .icon img { width: 100%; height: 100%; object-fit: cover; }
-
       .user-message { margin-left: auto; flex-direction: row-reverse; }
       .user-message .icon { margin-left: 8px; margin-right: 0; }
       .user-message div { background-color: #dcf8c6; border-bottom-right-radius: 4px; }
-
       .assistant-message { margin-right: auto; }
       .assistant-message div { background-color: #f1f0f0; border-bottom-left-radius: 4px; }
-
-      /* Styling voor de spinner zelf */
-      .loader {
-        border: 2px solid #f3f3f3;
-        border-top: 2px solid #3498db;
-        border-radius: 50%;
-        width: 4px;
-        height: 4px;
-        animation: spin 1.5s linear infinite;
-        margin: 4px;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-	  
-      /* === DE ENIGE, SIMPELE WIJZIGING VOOR MOBIELE WEERGAVE === */
-      @media (max-width: 480px) {
-        #chatbot-container {
-          width: 90%;
-          left: 5%;
-          right: 5%;
-        }
-      }
+      .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; width: 4px; height: 4px; animation: spin 1.5s linear infinite; margin: 4px; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      @media (max-width: 480px) { #chatbot-container { width: 90%; left: 5%; right: 5%; } }
     </style>
-
 </head>
-
 <body>
 
   <header class="page-header">
     <div class="header-content">
-      <img src="logo.png" alt="DLML Logo" class="header-logo">
       <h1>Diabetes Liga Midden-Limburg</h1>
       <p>Uw AI Assistent voor informatie en ondersteuning</p>
     </div>
   </header>
 
   <main class="intro-content">
-    <!-- HIER STAAT UW VOLLEDIGE, PERSOONLIJKE INTRODUCTIETEKST -->
-    <!-- Deze tekst hoeft u niet te veranderen, die is al perfect -->
     <h1>Welkom! Test de nieuwe AI Assistent die ik heb gebouwd</h1>
-    <p>
-      Beste bestuursleden, de afgelopen tijd heb ik gewerkt aan een project om een chatbot te bouwen voor DLML. Dit is de eerste werkende versie die ik graag aan jullie wil voorstellen. Mijn doel is om onze leden en geïnteresseerden 24/7 op een laagdrempelige manier te helpen met hun vragen. Klik op de chatknop rechtsonder om hem zelf uit te proberen!
-    </p>
+    <p>Beste bestuursleden, de afgelopen tijd heb ik gewerkt aan een project om een chatbot te bouwen voor DLML. Dit is de eerste werkende versie die ik graag aan jullie wil voorstellen. Mijn doel is om onze leden en geïnteresseerden 24/7 op een laagdrempelige manier te helpen met hun vragen. Klik op de chatknop rechtsonder om hem zelf uit te proberen!</p>
     <h2>Hoe werkt deze chatbot?</h2>
-    <p>
-      Om de chatbot zo nuttig mogelijk te maken, heb ik hem voorzien van specifieke informatie. Hij volgt een duidelijke zoekmethode om u een antwoord te geven:
-    </p>
+    <p>Om de chatbot zo nuttig mogelijk te maken, heb ik hem voorzien van specifieke informatie. Hij volgt een duidelijke zoekmethode om u een antwoord te geven:</p>
     <ol>
       <li><strong>Eerst zoekt hij in onze eigen info:</strong> Ik heb wat DLML-gegevens toegevoegd over onze activiteiten en het bestuur, samen met de Q&A data over diabetes die ik reeds had.</li>
       <li><strong>Daarna gebruikt hij zijn algemene kennis:</strong> Als hij het antwoord niet in de toegevoegde info vindt, zal hij proberen de vraag te beantwoorden met zijn algemene AI-kennis.</li>
       <li><strong>Als niets lukt, geeft hij dat eerlijk toe:</strong> Vindt hij nergens een antwoord, dan geeft hij een standaardmelding met een doorverwijzing.</li>
     </ol>
-    <p>
-      <em>Belangrijk om te weten:</em> Omdat ik gebruikmaak van een gratis opzet, heeft de chatbot zijn beperkingen. Hij kan bijvoorbeeld niet live op het internet zoeken in websites. Desondanks verwacht ik dat hij het overgrote deel van de vragen over diabetes en DLML correct kan beantwoorden.
-    </p>
+    <p><em>Belangrijk om te weten:</em> Omdat ik gebruikmaak van een gratis opzet, heeft de chatbot zijn beperkingen. Hij kan bijvoorbeeld niet live op het internet zoeken in websites. Desondanks verwacht ik dat hij het overgrote deel van de vragen over diabetes en DLML correct kan beantwoorden.</p>
     <h2>Wat kunnen jullie testen?</h2>
     <p>Probeer gerust verschillende soorten vragen om te zien hoe hij reageert:</p>
     <ul>
@@ -141,7 +102,7 @@
     <p>Alvast bedankt voor het testen!</p>
   </main>
 
-  <!-- De chatbot-elementen blijven ongewijzigd -->
+  <!-- De chatbot-elementen -->
   <div id="chatbot-button">💬</div>
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
@@ -152,7 +113,7 @@
     </div>
   </div>
 
-  <!-- De scripts blijven ongewijzigd -->
+  <!-- De scripts -->
   <script src="chatbot.js"></script>
   <script>
     document.getElementById("chatbot-button").addEventListener("click", function () {
@@ -163,7 +124,5 @@
       if (e.key === "Enter") sendMessage();
     });
   </script>
-
 </body>
-
 </html>
