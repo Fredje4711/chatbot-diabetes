@@ -43,34 +43,27 @@
 
       /* Styling voor de spinner zelf */
       .loader {
-  border: 2px solid #f3f3f3; /* Iets dunnere rand voor een mooier effect */
-  border-top: 2px solid #3498db;
-  border-radius: 50%;
-  width: 4px;  /* 50% kleiner */
-  height: 4px; /* 50% kleiner */
-  animation: spin 1.5s linear infinite;
-  margin: 4px; /* Iets meer marge om het mooi te centreren */
-}
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        width: 4px;
+        height: 4px;
+        animation: spin 1.5s linear infinite;
+        margin: 4px;
+      }
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
-	  /* === NIEUWE REGELS VOOR MOBIELE WEERGAVE === */
-@media (max-width: 480px) {
-  /* Op kleine schermen, maak de chat container schermvullend */
-  #chatbot-container {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    bottom: auto;
-    right: auto;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-  }
-}
+	  
+      /* === DE ENIGE, SIMPELE WIJZIGING VOOR MOBIELE WEERGAVE === */
+      @media (max-width: 480px) {
+        #chatbot-container {
+          width: 90%;
+          left: 5%;
+          right: 5%;
+        }
+      }
     </style>
 
 </head>
@@ -87,7 +80,7 @@
     </div>
   </div>
 
-  <script src="chatbot.js"></script> <!-- Cache-busting (?v=...) is niet meer nodig -->
+  <script src="chatbot.js"></script>
   <script>
     // Toon/verberg chatvenster
     document.getElementById("chatbot-button").addEventListener("click", function () {
