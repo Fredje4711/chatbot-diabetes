@@ -7,15 +7,15 @@ async function sendMessage() {
 
   const userMessage = document.createElement("div");
   userMessage.className = "message user-message";
-  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`; // Gebruikers-icoon blijft een emoji
+  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
   chat.appendChild(userMessage);
   input.value = "";
 
-  // Laadindicator gebruikt nu uw logo
+  // Laadindicator: logo + spinner in de bubbel
   const loadingMessage = document.createElement("div");
   loadingMessage.className = "message assistant-message loading";
-  // ---- WIJZIGING HIER ----
-  loadingMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div class="loader"></div>`;
+  // ---- DE ENIGE WIJZIGING ZIT IN DEZE REGEL ----
+  loadingMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div><div class="loader"></div></div>`;
   chat.appendChild(loadingMessage);
   chat.scrollTop = chat.scrollHeight;
 
@@ -39,10 +39,8 @@ async function sendMessage() {
 
     loadingMessage.remove();
 
-    // Het antwoordbericht gebruikt nu uw logo
     const assistantMessage = document.createElement("div");
     assistantMessage.className = "message assistant-message";
-    // ---- WIJZIGING HIER ----
     assistantMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>${formattedAntwoord}</div>`;
     chat.appendChild(assistantMessage);
     chat.scrollTop = chat.scrollHeight;
@@ -50,11 +48,8 @@ async function sendMessage() {
   } catch (err) {
     console.error("Fout bij ophalen antwoord:", err);
     loadingMessage.remove();
-
-    // Het foutbericht gebruikt nu ook uw logo
     const errorMessage = document.createElement("div");
     errorMessage.className = "message assistant-message error";
-    // ---- WIJZIGING HIER ----
     errorMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
     chat.appendChild(errorMessage);
   }

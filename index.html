@@ -6,138 +6,42 @@
   <title>Diabetes Chatbot – Testpagina</title>
 
     <style>
-      /* --- UW OUDE STYLING VOOR DE CONTAINER (DIE BLIJFT) --- */
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-      }
+      /* --- ALGEMENE CONTAINER STYLING --- */
+      body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+      #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
+      #chatbot-container { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; border: 1px solid #ccc; border-radius: 10px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 1000; }
+      #chatbot-header { background-color: #007bff; color: white; padding: 10px; font-weight: bold; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+      #chat-box { flex: 1; padding: 10px; overflow-y: auto; font-size: 14px; }
+      #chatbot-input-area { display: flex; border-top: 1px solid #ccc; }
+      #chat-input { flex: 1; border: none; padding: 10px; font-size: 14px; }
+      #chatbot-send { background-color: #007bff; color: white; border: none; padding: 0 16px; cursor: pointer; }
 
-      #chatbot-button {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #007bff;
-        color: white;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        font-size: 28px;
-        text-align: center;
-        line-height: 60px;
-        cursor: pointer;
-        z-index: 1000;
-      }
-
-      #chatbot-container {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
-        width: 350px;
-        max-height: 500px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        background-color: white;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-
-      #chatbot-header {
-        background-color: #007bff;
-        color: white;
-        padding: 10px;
-        font-weight: bold;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-      }
-
-      #chat-box {
-        flex: 1;
-        padding: 10px;
-        overflow-y: auto;
-        font-size: 14px;
-      }
-
-      #chatbot-input-area {
-        display: flex;
-        border-top: 1px solid #ccc;
-      }
-
-      #chat-input {
-        flex: 1;
-        border: none;
-        padding: 10px;
-        font-size: 14px;
-      }
-
-      #chatbot-send {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 0 16px;
-        cursor: pointer;
-      }
-
-      /* --- DE NIEUWE, TOEGEVOEGDE STYLING VOOR DE BUBBELS --- */
-      .message {
-        display: flex;
-        align-items: flex-start;
-        margin: 10px 0;
-        max-width: 85%;
-        line-height: 1.4;
-      }
-
+      /* --- DEFINITIEVE STYLING VOOR DE BUBBELS EN ICONEN --- */
+      .message { display: flex; align-items: flex-start; margin: 10px 0; max-width: 85%; line-height: 1.4; }
+      .message div { padding: 10px 12px; border-radius: 18px; word-wrap: break-word; }
+      
       .message .icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%; /* Maakt de container rond */
-  flex-shrink: 0;
-  margin-right: 8px;
-  overflow: hidden; /* Zorgt dat de afbeelding niet buiten de ronde randen komt */
-  background: #e9e9eb; /* Valnet-achtergrondkleur */
-}
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        margin-right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        border-radius: 50%;
+        overflow: hidden;
+      }
+      .message .icon img { width: 100%; height: 100%; object-fit: cover; }
 
-/* NIEUWE REGEL: Zorgt dat de afbeelding de container vult */
-.message .icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Schaalt de afbeelding mooi */
-}
+      .user-message { margin-left: auto; flex-direction: row-reverse; }
+      .user-message .icon { margin-left: 8px; margin-right: 0; }
+      .user-message div { background-color: #dcf8c6; border-bottom-right-radius: 4px; }
 
-      .message div {
-        padding: 10px 12px;
-        border-radius: 18px;
-        word-wrap: break-word;
-      }
+      .assistant-message { margin-right: auto; }
+      .assistant-message div { background-color: #f1f0f0; border-bottom-left-radius: 4px; }
 
-      .user-message {
-        margin-left: auto;
-        flex-direction: row-reverse;
-      }
-      .user-message .icon {
-        margin-left: 8px;
-        margin-right: 0;
-        background: #007bff;
-        color: white;
-      }
-      .user-message div {
-        background-color: #dcf8c6;
-        border-bottom-right-radius: 4px;
-      }
-
-      .assistant-message {
-        margin-right: auto;
-      }
-      .assistant-message .icon {
-        background: #e9e9eb;
-      }
-      .assistant-message div {
-        background-color: #f1f0f0;
-        border-bottom-left-radius: 4px;
-      }
-
+      /* Styling voor de spinner zelf */
       .loader {
         border: 3px solid #f3f3f3;
         border-top: 3px solid #3498db;
@@ -145,15 +49,12 @@
         width: 18px;
         height: 18px;
         animation: spin 1.5s linear infinite;
+        margin: 2px;
       }
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
-	  /* NIEUWE REGEL: Laat het icoon draaien als het de 'loading' class heeft */
-.loading .icon {
-  animation: spin 1.5s linear infinite;
-}
     </style>
 
 </head>
@@ -170,7 +71,7 @@
     </div>
   </div>
 
-  <script src="chatbot.js?v=2"></script>
+  <script src="chatbot.js"></script> <!-- Cache-busting (?v=...) is niet meer nodig -->
   <script>
     // Toon/verberg chatvenster
     document.getElementById("chatbot-button").addEventListener("click", function () {
