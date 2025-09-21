@@ -6,6 +6,32 @@
   <title>Diabetes Chatbot – Testpagina</title>
 
     <style>
+	
+	/* === NIEUWE STYLING VOOR DE LANDINGSPAGINA-LOOK === */
+.page-header {
+  background-color: #007bff; /* Blauwe achtergrond */
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+}
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.header-logo {
+  width: 60px; /* Grootte van het logo in de header */
+  height: 60px;
+  margin-bottom: 15px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: 2.5em; /* Grotere titel */
+}
+.page-header p {
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+	
       /* --- ALGEMENE CONTAINER STYLING --- */
       body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
       #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
@@ -67,10 +93,56 @@
     </style>
 
 </head>
+
 <body>
 
-  <div id="chatbot-button">💬</div>
+  <header class="page-header">
+    <div class="header-content">
+      <img src="logo.png" alt="DLML Logo" class="header-logo">
+      <h1>Diabetes Liga Midden-Limburg</h1>
+      <p>Uw AI Assistent voor informatie en ondersteuning</p>
+    </div>
+  </header>
 
+  <main class="intro-content">
+    <!-- HIER STAAT UW VOLLEDIGE, PERSOONLIJKE INTRODUCTIETEKST -->
+    <!-- Deze tekst hoeft u niet te veranderen, die is al perfect -->
+    <h1>Welkom! Test de nieuwe AI Assistent die ik heb gebouwd</h1>
+    <p>
+      Beste bestuursleden, de afgelopen tijd heb ik gewerkt aan een project om een chatbot te bouwen voor DLML. Dit is de eerste werkende versie die ik graag aan jullie wil voorstellen. Mijn doel is om onze leden en geïnteresseerden 24/7 op een laagdrempelige manier te helpen met hun vragen. Klik op de chatknop rechtsonder om hem zelf uit te proberen!
+    </p>
+    <h2>Hoe werkt deze chatbot?</h2>
+    <p>
+      Om de chatbot zo nuttig mogelijk te maken, heb ik hem voorzien van specifieke informatie. Hij volgt een duidelijke zoekmethode om u een antwoord te geven:
+    </p>
+    <ol>
+      <li><strong>Eerst zoekt hij in onze eigen info:</strong> Ik heb wat DLML-gegevens toegevoegd over onze activiteiten en het bestuur, samen met de Q&A data over diabetes die ik reeds had.</li>
+      <li><strong>Daarna gebruikt hij zijn algemene kennis:</strong> Als hij het antwoord niet in de toegevoegde info vindt, zal hij proberen de vraag te beantwoorden met zijn algemene AI-kennis.</li>
+      <li><strong>Als niets lukt, geeft hij dat eerlijk toe:</strong> Vindt hij nergens een antwoord, dan geeft hij een standaardmelding met een doorverwijzing.</li>
+    </ol>
+    <p>
+      <em>Belangrijk om te weten:</em> Omdat ik gebruikmaak van een gratis opzet, heeft de chatbot zijn beperkingen. Hij kan bijvoorbeeld niet live op het internet zoeken in websites. Desondanks verwacht ik dat hij het overgrote deel van de vragen over diabetes en DLML correct kan beantwoorden.
+    </p>
+    <h2>Wat kunnen jullie testen?</h2>
+    <p>Probeer gerust verschillende soorten vragen om te zien hoe hij reageert:</p>
+    <ul>
+      <li><strong>Vragen over onze activiteiten:</strong><br><em>Voorbeeld:</em> <code>Wat is er te doen in december?</code> of <code>Geef alle info over de fietstocht.</code></li>
+      <li><strong>Vragen over het bestuur:</strong><br><em>Voorbeeld:</em> <code>Geef alle gegevens van het bestuur.</code> of <code>Wie is Guido Smets?</code></li>
+      <li><strong>Vragen over diabetes (uit de kennisbank):</strong><br><em>Voorbeeld:</em> <code>Moet mijn voorlopig rijbewijs aangepast worden?</code> of <code>Is diabetes te genezen?</code></li>
+      <li><strong>Algemene kennisvragen:</strong><br><em>Voorbeeld:</em> <code>Wat is de hoofdstad van Canada?</code></li>
+    </ul>
+    <h2>Jullie feedback aan mij is cruciaal!</h2>
+    <p>Na het testen hoor ik graag jullie feedback. Let vooral op de volgende zaken:</p>
+    <ul>
+      <li><strong>Foute of onvolledige antwoorden:</strong> Vond je een vraag waarop de chatbot duidelijk verkeerd antwoordde? Geef de exacte vraag aan mij door!</li>
+      <li><strong>Niet-gevonden antwoorden:</strong> Stelde je een vraag waarvan je vindt dat het antwoord in onze kennisbank zou moeten zitten, maar kreeg je een "ik weet het niet"-melding?</li>
+      <li><strong>Gebruiksgemak:</strong> Is de chatbot makkelijk in gebruik? Is de opmaak duidelijk? Alle suggesties zijn welkom.</li>
+    </ul>
+    <p>Alvast bedankt voor het testen!</p>
+  </main>
+
+  <!-- De chatbot-elementen blijven ongewijzigd -->
+  <div id="chatbot-button">💬</div>
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
     <div id="chat-box"></div>
@@ -80,18 +152,18 @@
     </div>
   </div>
 
+  <!-- De scripts blijven ongewijzigd -->
   <script src="chatbot.js"></script>
   <script>
-    // Toon/verberg chatvenster
     document.getElementById("chatbot-button").addEventListener("click", function () {
       const venster = document.getElementById("chatbot-container");
       venster.style.display = venster.style.display === "none" ? "flex" : "none";
     });
-
-    // Enter activeert versturen
     document.getElementById("chat-input").addEventListener("keydown", function (e) {
       if (e.key === "Enter") sendMessage();
     });
   </script>
+
 </body>
+
 </html>
