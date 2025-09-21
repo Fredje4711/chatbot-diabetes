@@ -5,17 +5,17 @@ async function sendMessage() {
 
   const chat = document.getElementById("chat-box");
 
-  // HERSTELDE OUDE OPMAAK VOOR DE GEBRUIKERSBUBBEL
   const userMessage = document.createElement("div");
-  userMessage.className = "message user-message"; // Gebruik de class namen uit uw CSS
-  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
+  userMessage.className = "message user-message";
+  userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`; // Gebruikers-icoon blijft een emoji
   chat.appendChild(userMessage);
   input.value = "";
 
-  // Laadindicator met de correcte opmaak
+  // Laadindicator gebruikt nu uw logo
   const loadingMessage = document.createElement("div");
   loadingMessage.className = "message assistant-message loading";
-  loadingMessage.innerHTML = `<span class="icon">🤖</span><div class="loader"></div>`;
+  // ---- WIJZIGING HIER ----
+  loadingMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div class="loader"></div>`;
   chat.appendChild(loadingMessage);
   chat.scrollTop = chat.scrollHeight;
 
@@ -37,23 +37,25 @@ async function sendMessage() {
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
     const formattedAntwoord = antwoord.replace(/\n/g, '<br>');
 
-    // Verwijder de laadindicator
     loadingMessage.remove();
 
-    // HERSTELDE OUDE OPMAAK VOOR DE BOT-BUBBEL
+    // Het antwoordbericht gebruikt nu uw logo
     const assistantMessage = document.createElement("div");
     assistantMessage.className = "message assistant-message";
-    assistantMessage.innerHTML = `<span class="icon">🤖</span><div>${formattedAntwoord}</div>`;
+    // ---- WIJZIGING HIER ----
+    assistantMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>${formattedAntwoord}</div>`;
     chat.appendChild(assistantMessage);
     chat.scrollTop = chat.scrollHeight;
 
   } catch (err) {
     console.error("Fout bij ophalen antwoord:", err);
     loadingMessage.remove();
-    // Foutmelding met de correcte opmaak
+
+    // Het foutbericht gebruikt nu ook uw logo
     const errorMessage = document.createElement("div");
     errorMessage.className = "message assistant-message error";
-    errorMessage.innerHTML = `<span class="icon">⚠️</span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
+    // ---- WIJZIGING HIER ----
+    errorMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>Er is een fout opgetreden. Probeer opnieuw.</div>`;
     chat.appendChild(errorMessage);
   }
 }
