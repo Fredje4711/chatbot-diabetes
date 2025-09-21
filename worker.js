@@ -104,9 +104,16 @@ export default {
                 
                 const ai = env.AI;
                 const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg.
-                1. Als de CONTEXT hieronder relevante informatie bevat, baseer je antwoord dan VOLLEDIG op die context.
-                2. Als de CONTEXT "Geen relevante informatie gevonden." is, gebruik dan je ALGEMENE kennis en zeg: "Op basis van algemene informatie, ...".
-                CONTEXT: ${context}`;
+
+**Regel 1:** Als de CONTEXT hieronder relevante informatie bevat om de vraag van de gebruiker te beantwoorden, baseer je antwoord dan **volledig en uitsluitend** op die context.
+    
+**Regel 2:** Als de CONTEXT "Geen relevante informatie gevonden." is, of als het antwoord niet in de context staat, gebruik dan je **algemene kennis** om een behulpzaam antwoord te geven.
+    
+**Regel 3:** Als je je algemene kennis gebruikt (volgens Regel 2), voeg dan **altijd** aan het einde van je antwoord de volgende zin toe op een nieuwe regel: "Voor specifieke informatie over de Diabetes Liga Midden-Limburg kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be."
+    
+**Regel 4:** Wees altijd vriendelijk en behulpzaam.
+    
+CONTEXT: ${context}`;
                 
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
                 const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
