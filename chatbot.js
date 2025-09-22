@@ -11,10 +11,8 @@ async function sendMessage() {
   chat.appendChild(userMessage);
   input.value = "";
 
-  // Laadindicator: logo + spinner in de bubbel
   const loadingMessage = document.createElement("div");
   loadingMessage.className = "message assistant-message loading";
-  // ---- DE ENIGE WIJZIGING ZIT IN DEZE REGEL ----
   loadingMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div><div class="loader"></div></div>`;
   chat.appendChild(loadingMessage);
   chat.scrollTop = chat.scrollHeight;
@@ -35,7 +33,13 @@ async function sendMessage() {
 
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
-    const formattedAntwoord = antwoord.replace(/\n/g, '<br>');
+    
+    // Converteer regeleindes naar <br>
+    let formattedAntwoord = antwoord.replace(/\n/g, '<br>');
+    
+    // NIEUWE REGEL: Zoek naar URLs en maak ze aanklikbaar
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    formattedAntwoord = formattedAntwoord.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
 
     loadingMessage.remove();
 
