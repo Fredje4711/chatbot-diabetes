@@ -3,7 +3,7 @@
 let kbEmbeddingsCache = {};
 
 // Deze functie zoekt de 3 meest relevante stukken tekst uit de volledige kennisbank
-async function findSemanticBestMatches(question, kbData, env, topK = 3) {
+async function findSemanticBestMatches(question, kbData, env, topK = 1) {
     const cacheKey = "all_items_cache";
     // Als de cache leeg is, vul hem dan door alle titels en teksten om te zetten naar "betekeniscodes"
     if (!kbEmbeddingsCache[cacheKey]) {
