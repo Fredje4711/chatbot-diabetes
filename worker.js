@@ -106,9 +106,9 @@ export default {
 **TAAL:** Antwoord ALTIJD in het Nederlands.
 
 **INSTRUCTIES:**
-1.  Baseer je antwoord VOLLEDIG op de onderstaande CONTEXT.
-2.  Als de CONTEXT meerdere items bevat (gescheiden door '---'), vermeld dan de informatie van **ALLE items** die relevant zijn voor de vraag.
-3.  Als de CONTEXT "Geen relevante informatie gevonden." is, antwoord dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Gebruik je algemene kennis NIET.
+1.  De CONTEXT hieronder kan een lijst van items zijn, gescheiden door '---'.
+2.  Analyseer de vraag van de gebruiker en geef een antwoord gebaseerd op **ALLE RELEVANTE items** uit de CONTEXT. Vat niet samen tot één item als er meerdere relevant zijn.
+3.  Als de CONTEXT "Geen relevante informatie gevonden." is, antwoord dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden."
 4.  Geef de informatie uit de context zo letterlijk en compleet mogelijk weer.
 
 CONTEXT:

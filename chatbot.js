@@ -34,8 +34,8 @@ async function sendMessage() {
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
     
-    // EERST de URLs aanklikbaar maken
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // EERST de URLs aanklikbaar maken met de VERBETERDE regex
+    const urlRegex = /(https?:\/\/[^\s()<>]+?\.(?:pdf|jpg|png|be|com|net|org))/g;
     let formattedAntwoord = antwoord.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
     
     // DAARNA de regeleindes omzetten naar <br>
@@ -49,7 +49,8 @@ async function sendMessage() {
     chat.appendChild(assistantMessage);
     chat.scrollTop = chat.scrollHeight;
 
-  } catch (err) {
+  } catch (err)
+ {
     console.error("Fout bij ophalen antwoord:", err);
     loadingMessage.remove();
     const errorMessage = document.createElement("div");
