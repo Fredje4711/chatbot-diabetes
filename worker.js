@@ -103,9 +103,16 @@ export default {
                 
                 const ai = env.AI;
                 const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg.
-                1. Als de CONTEXT hieronder relevante informatie bevat, baseer je antwoord dan VOLLEDIG op die context.
-                2. Als de CONTEXT "Geen relevante informatie gevonden." is, gebruik dan je ALGEMENE kennis en zeg: "Op basis van algemene informatie, ...".
-                CONTEXT: ${context}`;
+**TAAL:** Antwoord ALTIJD in het Nederlands.
+
+**INSTRUCTIES:**
+1.  Baseer je antwoord VOLLEDIG op de onderstaande CONTEXT.
+2.  Als de CONTEXT meerdere items bevat (gescheiden door '---'), vermeld dan de informatie van **ALLE items** die relevant zijn voor de vraag.
+3.  Als de CONTEXT "Geen relevante informatie gevonden." is, antwoord dan: "Mijn excuses, maar ik kan het antwoord op uw vraag niet in mijn kennisbank vinden." Gebruik je algemene kennis NIET.
+4.  Geef de informatie uit de context zo letterlijk en compleet mogelijk weer.
+
+CONTEXT:
+${context}`;
                 
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
                 const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
