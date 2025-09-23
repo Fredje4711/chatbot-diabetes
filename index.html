@@ -120,21 +120,28 @@
   </main>
 
   <!-- De chatbot-elementen -->
+ 
+   <!-- De HTML-structuur voor de chatbot met de correcte volgorde -->
   <div id="chatbot-button">💬</div>
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
     <div id="chat-box"></div>
+
+    <!-- DE CORRECTE VOLGORDE: EERST HET INVOERVELD -->
+    <div id="chatbot-input-area">
+      <input type="text" id="chat-input" placeholder="Typ je vraag..." />
+      <button id="chatbot-help-btn">?</button>
+      <button id="chatbot-send" onclick="sendMessage()">▶</button>
+    </div>
+
+    <!-- DAARNA DE AFROLLIJST -->
     <div id="chatbot-downloads-area">
       <label for="downloads-select">Of selecteer een presentatie:</label>
       <select id="downloads-select">
         <option value="">-- Kies een download --</option>
       </select>
     </div>
-    <div id="chatbot-input-area">
-      <input type="text" id="chat-input" placeholder="Typ je vraag..." />
-      <button id="chatbot-help-btn">?</button>
-      <button id="chatbot-send" onclick="sendMessage()">▶</button>
-    </div>
+    
   </div>
 
   <!-- De scripts -->
