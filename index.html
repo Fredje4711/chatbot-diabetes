@@ -13,7 +13,7 @@
         background-color: #007bff;
         color: white;
         text-align: center;
-        padding: 25px 20px; /* Verlaagde header */
+        padding: 25px 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
       .header-content h1 {
@@ -27,8 +27,8 @@
       }
 
       .intro-content { 
-        max-width: 800px; /* Maximale breedte voor de tekst */
-        margin: 40px auto;  /* Centreert de tekst horizontaal */
+        max-width: 800px;
+        margin: 40px auto;
         padding: 20px; 
         background-color: white;
         border-radius: 8px;
@@ -40,7 +40,7 @@
       .intro-content code { background-color: #e9e9eb; padding: 3px 7px; border-radius: 4px; font-family: monospace; }
       .intro-content ol, .intro-content ul { padding-left: 20px; }
 
-      /* --- CHATBOT STYLING (ongewijzigd) --- */
+      /* --- CHATBOT STYLING --- */
       #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
       #chatbot-container { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; border: 1px solid #ccc; border-radius: 10px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 1000; }
       #chatbot-header { background-color: #007bff; color: white; padding: 10px; font-weight: bold; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
@@ -62,26 +62,25 @@
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       
       @media (max-width: 480px) { #chatbot-container { width: 90%; left: 5%; right: 5%; } }
-	  /* Styling voor de download-afrollijst in de chatbot */
-#chatbot-downloads-area {
-  padding: 8px 10px;
-  border-top: 1px solid #ccc;
-  background-color: #f8f9fa;
-}
-#chatbot-downloads-area label {
-  display: block;
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: #555;
-}
-#downloads-select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 13px;
-}
+	  
+      #chatbot-downloads-area { padding: 8px 10px; border-top: 1px solid #ccc; background-color: #f8f9fa; }
+      #chatbot-downloads-area label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #555; }
+      #downloads-select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 13px; }
+
+      /* Styling voor de nieuwe help-knop */
+      #chatbot-help-btn {
+        background-color: #f1f0f0;
+        color: #555;
+        border: none;
+        border-left: 1px solid #ccc;
+        padding: 0 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      #chatbot-help-btn:hover {
+        background-color: #e9e9eb;
+      }
     </style>
 </head>
 <body>
@@ -125,74 +124,78 @@
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
     <div id="chat-box"></div>
+    <div id="chatbot-downloads-area">
+      <label for="downloads-select">Of selecteer een presentatie:</label>
+      <select id="downloads-select">
+        <option value="">-- Kies een download --</option>
+      </select>
+    </div>
     <div id="chatbot-input-area">
       <input type="text" id="chat-input" placeholder="Typ je vraag..." />
+      <button id="chatbot-help-btn">?</button>
       <button id="chatbot-send" onclick="sendMessage()">▶</button>
     </div>
-	<!-- AFROLLIJST VOOR DOWNLOADS -->
-<div id="chatbot-downloads-area">
-  <label for="downloads-select">Of selecteer een presentatie:</label>
-  <select id="downloads-select">
-    <option value="">-- Kies een download --</option>
-  </select>
-</div>
   </div>
 
   <!-- De scripts -->
   <script src="chatbot.js"></script>
 
-<script>
-  // --- NIEUWE CODE VOOR DE AFROLLIJST ---
-
-  // Deze functie wordt aangeroepen zodra de pagina geladen is.
-  async function populateDownloads() {
-    try {
-      // Haal de data op uit ons nieuwe menu-bestand.
-      const response = await fetch('downloads_menu.json');
-      const downloads = await response.json();
-      const selectElement = document.getElementById('downloads-select');
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
       
-      // Voeg elke presentatie toe als een optie in de afrollijst.
-      downloads.forEach(download => {
-        const option = document.createElement('option');
-        option.value = download.link;
-        option.textContent = download.title;
-        selectElement.appendChild(option);
-      });
-
-      // Voeg een 'event listener' toe die reageert als de gebruiker iets kiest.
-      selectElement.addEventListener('change', function() {
-        if (this.value) { // Zorg ervoor dat de default "-- Kies..." optie niets doet
-          window.open(this.value, '_blank'); // Open de PDF link in een nieuw tabblad
-          this.selectedIndex = 0; // Zet de lijst terug naar de default optie
+      // --- LOGICA VOOR DE AFROLLIJST ---
+      async function populateDownloads() {
+        try {
+          const response = await fetch('downloads_menu.json');
+          const downloads = await response.json();
+          const selectElement = document.getElementById('downloads-select');
+          downloads.forEach(download => {
+            const option = document.createElement('option');
+            option.value = download.link;
+            option.textContent = download.title;
+            selectElement.appendChild(option);
+          });
+          selectElement.addEventListener('change', function() {
+            if (this.value) {
+              window.open(this.value, '_blank');
+              this.selectedIndex = 0;
+            }
+          });
+        } catch (error) {
+          console.error('Fout bij het laden van de downloads:', error);
+          const selectElement = document.getElementById('downloads-select');
+          selectElement.innerHTML = '<option>Kon downloads niet laden.</option>';
         }
+      }
+      populateDownloads();
+
+      // --- NIEUWE CODE VOOR DE HELP KNOP ---
+      document.getElementById("chatbot-help-btn").addEventListener("click", function() {
+        const chatBox = document.getElementById("chat-box");
+        const helpText = `Hallo! Ik ben de AI Assistent van de Diabetes Liga Midden-Limburg. U kunt mij vragen stellen over:
+<br>- Onze activiteiten en infosessies
+<br>- Contactgegevens van het bestuur
+<br>- Algemene onderwerpen over diabetes
+<br>
+<br>Als ik het antwoord niet weet in mijn eigen documenten, probeer ik het met mijn algemene kennis. Ik ben een computerprogramma en kan geen medisch advies geven.`;
+
+        const helpMessage = document.createElement("div");
+        helpMessage.className = "message assistant-message";
+        helpMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>${helpText}</div>`;
+        chatBox.appendChild(helpMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-    } catch (error) {
-      console.error('Fout bij het laden van de downloads:', error);
-      // Optioneel: toon een foutmelding aan de gebruiker
-      const selectElement = document.getElementById('downloads-select');
-      selectElement.innerHTML = '<option>Kon downloads niet laden.</option>';
-    }
-  }
-
-  // Roep de functie aan zodra de HTML-pagina volledig is geladen.
-  document.addEventListener('DOMContentLoaded', populateDownloads);
-
-
-  // --- BESTAANDE CODE DIE BLIJFT WERKEN ---
-
-  // Toon/verberg chatvenster
-  document.getElementById("chatbot-button").addEventListener("click", function () {
-    const venster = document.getElementById("chatbot-container");
-    venster.style.display = venster.style.display === "none" ? "flex" : "none";
-  });
-
-  // Enter activeert versturen
-  document.getElementById("chat-input").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") sendMessage();
-  });
-</script>
+      // --- BESTAANDE CODE VOOR DE ANDERE KNOPPEN ---
+      document.getElementById("chatbot-button").addEventListener("click", function () {
+        const venster = document.getElementById("chatbot-container");
+        venster.style.display = venster.style.display === "none" ? "flex" : "none";
+      });
+      document.getElementById("chat-input").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") sendMessage();
+      });
+    });
+  </script>
 
 </body>
 </html>
