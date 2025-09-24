@@ -34,14 +34,21 @@ async function sendMessage() {
     const data = await response.json();
     const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
     
-    // EERST de URLs aanklikbaar maken
-    const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    let formattedAntwoord = antwoord.replace(urlRegex, (url) => {
+    // --- DEFINITIEVE, DUBBELE LINK-VERVANGER ---
+
+    // Stap A: Converteer Markdown links ([titel](url)) eerst naar HTML links
+    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    let formattedAntwoord = antwoord.replace(markdownLinkRegex, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Stap B: Converteer daarna de overgebleven losse URLs naar HTML links
+    const urlRegex = /(?<!href=")(https?:\/\/[^\s<]+)/g; // Zoekt naar URLs die nog niet in een <a> tag staan
+    formattedAntwoord = formattedAntwoord.replace(urlRegex, (url) => {
+        // Verwijder eventuele leestekens aan het einde van de URL
         const cleanedUrl = url.replace(/[.,!?;:]+$/, '');
         return `<a href="${cleanedUrl}" target="_blank" rel="noopener noreferrer">${cleanedUrl}</a>`;
     });
     
-    // DAARNA de regeleindes omzetten naar <br>
+    // Stap C: Converteer regeleindes naar <br>
     formattedAntwoord = formattedAntwoord.replace(/\n/g, '<br>');
 
     loadingMessage.remove();
