@@ -56,7 +56,7 @@ export default {
             if (contextFound) {
                 systemPrompt = `Je bent een expert-assistent. Baseer je antwoord VOLLEDIG op de CONTEXT. Wees zo letterlijk en compleet mogelijk. Antwoord in het Nederlands. CONTEXT: ${context}`;
             } else {
-                systemPrompt = `Je bent een algemene AI-assistent. Beantwoord de vraag naar beste vermogen. Als je het antwoord weet, voeg dan AAN HET EINDE op een nieuwe regel de zin toe: "Houd er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.". Als je het antwoord NIET weet, antwoord dan letterlijk: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be.". Antwoord in het Nederlands.`;
+                systemPrompt = `Je bent een algemene AI-assistent. Beantwoord de vraag naar beste vermogen. Als je het antwoord weet, voeg dan aan het einde op een nieuwe regel de zin toe: "Houd er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.". Als je het antwoord NIET weet, antwoord dan letterlijk: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be.". Antwoord in het Nederlands.`;
             }
             
             const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
