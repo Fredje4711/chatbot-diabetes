@@ -1,4 +1,4 @@
-// === MINI-DATABASE (voor hardgecodeerde, perfecte antwoorden) ===
+// === MINI-DATABASE (voor 100% betrouwbare antwoorden) ===
 const structuredData = {
     contacts: [
         { name: "Guido Smets", functions: ["Covoorzitter", "Penningmeester"], email: "guido.smets4@telenet.be", phone: "0474 32 44 14" },
@@ -18,43 +18,75 @@ const structuredData = {
         { type: "Activiteit", titel: "Wandelevenement Wereld Diabetes Dag 2025", datum: "zondag 16 november 2025", tijd: "9.00 u - 18.00 u", locatie: "Natuurpunt Hasselt", prijs: "volwassenen € 2,00 p.p., kinderen gratis" },
         { type: "Activiteit", titel: "Ledenfeest 2025", datum: "zaterdag 13 december 2025", tijd: "11.30 u", locatie: "zaal De Ploeg, Diepenbeek", prijs: "€ 45.00 p.p." },
         { type: "Activiteit", titel: "Wekelijkse wandeling", datum: "iedere zondag", tijd: "9.30 u - 11.30 u", locatie: "Kiewit - Hasselt", gids: "Jan Pierco", prijs: "gratis" }
-    ]
+    ],
+    general: {
+        email: "midden.limburg@diabetes.be",
+        website: "https://fredje4711.github.io/dlml/",
+        social: {
+            facebook: "https://www.facebook.com/p/Diabetes-Liga-Midden-Limburg-100091325418693",
+            instagram: "https://www.instagram.com/diabetes_liga_midden_limburg/",
+            youtube: "https://www.youtube.com/@Diabetesligamiddenlimburg"
+        }
+    }
 };
 
-// De "RECEPTIONIST" voor 100% betrouwbare antwoorden op lijst-vragen
+const getCleanWords = (text) => new Set(text.toLowerCase().replace(/[.,!?;:"()]/g, "").split(/\s+/).filter(w => w.length > 2));
+const formatEventDetails = (e) => {
+    let details = [`Titel: ${e.titel}`, `Datum: ${e.datum}`, `Tijd: ${e.tijd}`, `Locatie: ${e.locatie}`, `Prijs: ${e.prijs}`];
+    if (e.spreker) details.push(`Spreker: ${e.spreker}`);
+    if (e.gids) details.push(`Gids: ${e.gids}`);
+    return details.join('\n');
+};
+
 function findStructuredAnswer(question) {
     const q = question.toLowerCase();
+    const qWords = getCleanWords(question);
+
+    const socialMediaTriggers = ['sociale media', 'facebook', 'instagram', 'youtube'];
+    if (socialMediaTriggers.some(trigger => q.includes(trigger))) {
+        return `U kunt ons vinden op de volgende sociale media:\n\n- Facebook: ${structuredData.general.social.facebook}\n- Instagram: ${structuredData.general.social.instagram}\n- YouTube: ${structuredData.general.social.youtube}`;
+    }
     
-    // Vragen over het bestuur
-    if (q.includes('alle bestuursleden') || q.includes('lijst van het bestuur')) {
+    const fullListTriggers = ['alle bestuursleden', 'lijst van het bestuur', 'volledige gegevens bestuur', 'alle contactgegevens'];
+    if (fullListTriggers.some(trigger => q.includes(trigger))) {
         const fullDetails = structuredData.contacts.map(c => `${c.name} (${c.functions.join(', ')}):\n- E-mail: ${c.email}\n- Telefoon: ${c.phone}`).join('\n\n');
-        return `Hier is de volledige lijst van de bestuursleden:\n\n${fullDetails}`;
+        return `Hier is de volledige lijst van de bestuursleden en hun contactgegevens:\n\n${fullDetails}`;
     }
-
-    // Vragen over evenementen
-    const eventKeywords = ['activiteiten', 'agenda', 'programma', 'evenementen'];
-    if (eventKeywords.some(kw => q.includes(kw))) {
-        let eventsToList = structuredData.events;
-        let responseTitle = "Hier is een overzicht van alle geplande activiteiten:\n\n";
-
-        if (q.includes('infosessies')) {
-            eventsToList = structuredData.events.filter(e => e.type === "Infosessie");
-            responseTitle = "Hier is een overzicht van alle geplande infosessies:\n\n";
-        } else if (q.includes('cultuur') || q.includes('ontspanning')) {
-            eventsToList = structuredData.events.filter(e => e.type === "Activiteit");
-             responseTitle = "Hier is een overzicht van alle geplande cultuur- en ontspanningsactiviteiten:\n\n";
+    for (const contact of structuredData.contacts) {
+        if (qWords.has(contact.name.toLowerCase().split(' ')[0])) {
+            return `Hier zijn de gegevens van ${contact.name} (${contact.functions.join(', ')}):\n- E-mail: ${contact.email}\n- Telefoon: ${contact.phone}`;
         }
-        
-        const eventList = eventsToList.map(e => `- ${e.titel} op ${e.datum}`).join('\n');
-        return responseTitle + eventList;
+    }
+    if (q.includes('bestuur') || q.includes('contact') || q.includes('website') || q.includes('mailadres')) {
+        return `De bestuursleden zijn: ${structuredData.contacts.map(c => c.name).join(', ')}.\nHet algemene e-mailadres is ${structuredData.general.email} en de website is ${structuredData.general.website}.\nVoor de volledige lijst, vraag "geef alle bestuursleden".`;
     }
 
-    return null; // Geen match, geef door aan de "Bibliothecaris"
+    const eventKeywords = ['activiteiten', 'agenda', 'programma', 'evenementen', 'wat is er te doen'];
+    const months = ['september', 'oktober', 'november', 'december'];
+    let targetMonth = months.find(m => q.includes(m));
+    if (eventKeywords.some(kw => q.includes(kw)) || targetMonth) {
+        let eventsToShow = structuredData.events;
+        if(targetMonth) { eventsToShow = eventsToShow.filter(e => e.datum.toLowerCase().includes(targetMonth)); }
+        if(eventsToShow.length === 0) return `Ik kon geen evenementen vinden die aan uw vraag voldoen.`;
+        return `Hier is een overzicht van de geplande evenementen:\n\n` + eventsToShow.map(e => `- ${e.titel} op ${e.datum}`).join('\n');
+    }
+    
+    const scoredEvents = structuredData.events.map(event => {
+        const titleWords = getCleanWords(event.titel);
+        let score = 0;
+        qWords.forEach(qw => { if (titleWords.has(qw)) score++; });
+        return { ...event, score };
+    }).filter(e => e.score > 0).sort((a, b) => b.score - a.score);
+
+    if (scoredEvents.length > 0 && scoredEvents[0].score >= 2) {
+        return formatEventDetails(scoredEvents[0]);
+    }
+
+    return null;
 }
 
-// De "BIBLIOTHECARIS" voor slimme antwoorden op alle andere vragen
 let kbEmbeddingsCache = {};
-async function findSemanticBestMatches(question, kbData, env, topK = 3) {
+async function findSemanticBestMatch(question, kbData, env) {
     const cacheKey = "all_items_cache";
     if (!kbEmbeddingsCache[cacheKey]) {
         const textsToEmbed = kbData.map(item => item.titel + "\n" + item.tekst);
@@ -67,7 +99,7 @@ async function findSemanticBestMatches(question, kbData, env, topK = 3) {
     if (!questionResponse.ok) { console.error("Fout bij ophalen vraag embedding:", await questionResponse.text()); return "Geen relevante informatie gevonden."; }
     const { data: questionData } = await questionResponse.json();
     const questionEmbedding = questionData[0].embedding;
-    let matches = [];
+    let bestMatch = { score: -1, index: -1 };
     for (let i = 0; i < kbEmbeddingsCache[cacheKey].length; i++) {
         let dotProduct = 0, normA = 0, normB = 0;
         for (let j = 0; j < questionEmbedding.length; j++) {
@@ -76,16 +108,14 @@ async function findSemanticBestMatches(question, kbData, env, topK = 3) {
             normB += kbEmbeddingsCache[cacheKey][i][j] ** 2;
         }
         const score = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-        matches.push({ score, index: i });
+        if (score > bestMatch.score) { bestMatch = { score, index: i }; }
     }
-    matches.sort((a, b) => b.score - a.score);
-    if (matches.length > 0 && matches[0].score > 0.78) {
-        return matches.slice(0, topK).map(match => `--- BRON: ${kbData[match.index].titel} ---\n${kbData[match.index].tekst}`).join('\n\n');
+    if (bestMatch.score > 0.82) { 
+        return kbData[bestMatch.index].tekst;
     }
     return "Geen relevante informatie gevonden.";
 }
 
-// === HOOFDFUNCTIE ===
 export default {
     async fetch(request, env) {
         const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
@@ -94,43 +124,36 @@ export default {
         try {
             const { question } = await request.json();
             if (!question) return new Response('Vraag ontbreekt.', { status: 400, headers: corsHeaders });
-
+            
             let finalAnswer = findStructuredAnswer(question);
-            let contextForDisclaimer = "Geen relevante informatie gevonden.";
+            let contextFound = !!finalAnswer;
 
             if (!finalAnswer) {
                 const object = await env.KB_BUCKET.get('kb_master.json');
                 if (object === null) throw new Error('Kennisbank (kb_master.json) niet gevonden in R2.');
                 const kbData = await object.json();
+                const context = await findSemanticBestMatch(question, kbData, env);
+                contextFound = context !== "Geen relevante informatie gevonden.";
                 
-                const context = await findSemanticBestMatches(question, kbData, env);
-                contextForDisclaimer = context; // Onthoud of we iets vonden
-                
-                const systemPrompt = `Je bent een expert-assistent voor de Diabetes Liga Midden-Limburg. Antwoord altijd in het Nederlands. Jouw taak is om de vraag van de gebruiker te beantwoorden op basis van de meegeleverde CONTEXT.
-                INSTRUCTIES:
-                1. Analyseer de vraag en de context. Synthetiseer de informatie uit ALLE relevante documenten in de context tot één vloeiend, compleet en accuraat antwoord.
-                2. Als de context "Geen relevante informatie gevonden." is, gebruik dan je algemene kennis.
-                3. Als een link (URL) wordt vermeld, neem deze dan ALTIJD op in je antwoord. Schrijf de URL volledig uit. GEBRUIK GEEN Markdown opmaak.
+                const systemPrompt = `Je bent een chatbot voor de Diabetes Liga Midden-Limburg.
+                1. Als de CONTEXT hieronder relevante informatie bevat, baseer je antwoord dan VOLLEDIG op die context.
+                2. Als de CONTEXT "Geen relevante informatie gevonden." is, gebruik dan je ALGEMENE kennis.
+                3. Als zelfs je algemene kennis niet helpt, antwoord dan letterlijk: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be."
                 CONTEXT: ${context}`;
                 
                 const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
-
                 const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({ model: "gpt-4o", messages: messages })
                 });
-
-                if (!openAIResponse.ok) throw new Error(`OpenAI API fout: ${openAIResponse.status}`);
-                
                 const responseData = await openAIResponse.json();
                 finalAnswer = responseData.choices[0].message.content;
             }
             
-            // Disclaimer logica
-            if (contextForDisclaimer !== "Geen relevante informatie gevonden.") {
-                 finalAnswer += "\n\nLet op: deze informatie is van algemene aard. Voor persoonlijk medisch advies, raadpleeg altijd uw arts.";
-            } else if (!findStructuredAnswer(question)) { // Alleen als het niet door de receptionist is beantwoord
+            if (contextFound) {
+                finalAnswer += "\n\nLet op: deze informatie is van algemene aard. Voor persoonlijk medisch advies, raadpleeg altijd uw arts.";
+            } else if (!findStructuredAnswer(question)) {
                  finalAnswer += "\n\nHoud er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.";
             }
 
