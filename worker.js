@@ -21,7 +21,7 @@ const structuredData = {
     ],
     general: {
         email: "midden.limburg@diabetes.be",
-        website: "https://fredje4711.github.io/dlml/",
+        website: "https://www.dlml.be/",
         social: {
             facebook: "https://www.facebook.com/p/Diabetes-Liga-Midden-Limburg-100091325418693",
             instagram: "https://www.instagram.com/diabetes_liga_midden_limburg/",
