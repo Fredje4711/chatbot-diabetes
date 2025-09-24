@@ -5,21 +5,13 @@ async function findSemanticBestMatches(question, kbData, env, topK = 1) {
     if (!kbEmbeddingsCache[cacheKey]) {
         console.log("Aanmaken van kennisbank-embeddings cache...");
         const textsToEmbed = kbData.map(item => item.titel + "\n" + item.tekst);
-        const response = await fetch("https://api.openai.com/v1/embeddings", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ input: textsToEmbed, model: "text-embedding-ada-002" }),
-        });
+        const response = await fetch("https://api.openai.com/v1/embeddings", { method: "POST", headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ input: textsToEmbed, model: "text-embedding-ada-002" }), });
         if (!response.ok) { console.error("Fout bij ophalen KB embeddings:", await response.text()); return "Geen relevante informatie gevonden."; }
         const { data } = await response.json();
         kbEmbeddingsCache[cacheKey] = data.map(d => d.embedding);
         console.log("Cache aangemaakt.");
     }
-    const questionResponse = await fetch("https://api.openai.com/v1/embeddings", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ input: question, model: "text-embedding-ada-002" }),
-    });
+    const questionResponse = await fetch("https://api.openai.com/v1/embeddings", { method: "POST", headers: { "Authorization": `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ input: question, model: "text-embedding-ada-002" }), });
     if (!questionResponse.ok) { console.error("Fout bij ophalen vraag embedding:", await questionResponse.text()); return "Geen relevante informatie gevonden."; }
     const { data: questionData } = await questionResponse.json();
     const questionEmbedding = questionData[0].embedding;
@@ -55,31 +47,29 @@ export default {
             const kbData = await object.json();
             
             const context = await findSemanticBestMatches(question, kbData, env);
-            
+            const contextFound = context !== "Geen relevante informatie gevonden.";
+
             const ai = env.AI;
-
-			const systemPrompt = `Je bent een vriendelijke en professionele chatbot voor de Diabetes Liga Midden-Limburg. Antwoord altijd in het Nederlands.
-
-**Jouw Persoonlijkheid en Regels:**
-
-1.  **Als de CONTEXT hieronder een antwoord bevat:**
-    *   Baseer je antwoord **volledig en uitsluitend** op de CONTEXT.
-    *   Formuleer een duidelijk en compleet antwoord.
-    *   Voeg **altijd** de volgende zin toe aan het einde van je antwoord, op een nieuwe regel: "Let op: deze informatie is van algemene aard. Voor persoonlijk medisch advies, raadpleeg altijd uw arts."
-
-2.  **Als de CONTEXT "Geen relevante informatie gevonden." is:**
-    *   Probeer de vraag te beantwoorden met je **algemene kennis**.
-    *   Voeg **altijd** de volgende zin toe aan het einde van je antwoord, op een nieuwe regel: "Houd er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden."
-
-3.  **Als je het antwoord NIET weet (ook niet met algemene kennis):**
-    *   Antwoord dan **letterlijk**: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be."
-
-CONTEXT:
-${context}`;	
+            
+            // --- DE DEFINITIEVE, GECORRIGEERDE PROMPT ---
+            let systemPrompt;
+            if (contextFound) {
+                systemPrompt = `Je bent een expert-assistent. Baseer je antwoord VOLLEDIG op de CONTEXT. Wees zo letterlijk en compleet mogelijk. Antwoord in het Nederlands. CONTEXT: ${context}`;
+            } else {
+                systemPrompt = `Je bent een algemene AI-assistent. Beantwoord de vraag naar beste vermogen. Als je het antwoord weet, voeg dan AAN HET EINDE op een nieuwe regel de zin toe: "Houd er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.". Als je het antwoord NIET weet, antwoord dan letterlijk: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be.". Antwoord in het Nederlands.`;
+            }
+            
             const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
             const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
             
-            const responsePayload = { choices: [{ message: { role: 'assistant', content: aiResponse.response } }] };
+            let finalAnswer = aiResponse.response;
+
+            // --- DE NIEUWE, BETROUWBARE DISCLAIMER LOGICA ---
+            if (contextFound) {
+                finalAnswer += "\n\nLet op: deze informatie is van algemene aard. Voor persoonlijk medisch advies, raadpleeg altijd uw arts.";
+            }
+            
+            const responsePayload = { choices: [{ message: { role: 'assistant', content: finalAnswer } }] };
             return new Response(JSON.stringify(responsePayload), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         } catch (e) {
             return new Response(`Er is een fout opgetreden: ${e.message}`, { status: 500, headers: corsHeaders });
