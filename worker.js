@@ -1,6 +1,6 @@
 // === FUNCTIES VOOR SEMANTISCH ZOEKEN ===
 let kbEmbeddingsCache = {};
-async function findSemanticBestMatches(question, kbData, env, topK = 1) {
+async function findSemanticBestMatches(question, kbData, env, topK = 3) { // We vragen 3 resultaten voor meer context
     const cacheKey = "all_items_cache";
     if (!kbEmbeddingsCache[cacheKey]) {
         console.log("Aanmaken van kennisbank-embeddings cache...");
@@ -16,6 +16,7 @@ async function findSemanticBestMatches(question, kbData, env, topK = 1) {
     const { data: questionData } = await questionResponse.json();
     const questionEmbedding = questionData[0].embedding;
     let bestMatch = { score: -1, index: -1 };
+    let matches = [];
     for (let i = 0; i < kbEmbeddingsCache[cacheKey].length; i++) {
         let dotProduct = 0, normA = 0, normB = 0;
         for (let j = 0; j < questionEmbedding.length; j++) {
@@ -24,10 +25,11 @@ async function findSemanticBestMatches(question, kbData, env, topK = 1) {
             normB += kbEmbeddingsCache[cacheKey][i][j] ** 2;
         }
         const score = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-        if (score > bestMatch.score) { bestMatch = { score, index: i }; }
+        matches.push({ score, index: i });
     }
-    if (bestMatch.score > 0.8) { 
-        return kbData[bestMatch.index].tekst;
+    matches.sort((a, b) => b.score - a.score);
+    if (matches.length > 0 && matches[0].score > 0.78) {
+        return matches.slice(0, topK).map(match => kbData[match.index].tekst).join('\n\n---\n\n');
     }
     return "Geen relevante informatie gevonden.";
 }
@@ -49,28 +51,46 @@ export default {
             const context = await findSemanticBestMatches(question, kbData, env);
             const contextFound = context !== "Geen relevante informatie gevonden.";
 
-            const ai = env.AI;
-            
-            // --- DE DEFINITIEVE, GECORRIGEERDE PROMPT ---
-            let systemPrompt;
-            if (contextFound) {
-                systemPrompt = `Je bent een expert-assistent. Baseer je antwoord VOLLEDIG op de CONTEXT. Wees zo letterlijk en compleet mogelijk. Antwoord in het Nederlands. CONTEXT: ${context}`;
-            } else {
-                systemPrompt = `Je bent een algemene AI-assistent. Beantwoord de vraag naar beste vermogen. Als je het antwoord weet, voeg dan aan het einde op een nieuwe regel de zin toe: "Houd er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.". Als je het antwoord NIET weet, antwoord dan letterlijk: "Mijn excuses, maar ik kan geen antwoord op uw vraag vinden. Voor meer informatie kunt u terecht op onze website www.dlml.be of mailen naar midden.limburg@diabetes.be.". Antwoord in het Nederlands.`;
-            }
+            const systemPrompt = `Je bent een expert-assistent voor de Diabetes Liga Midden-Limburg. Antwoord altijd in het Nederlands.
+            Jouw taak is om de vraag van de gebruiker te beantwoorden.
+            1.  Baseer je antwoord VOLLEDIG op de meegeleverde CONTEXT. Synthetiseer de informatie uit ALLE relevante documenten in de context tot één vloeiend, compleet en accuraat antwoord.
+            2.  Als de CONTEXT "Geen relevante informatie gevonden." is, gebruik dan je algemene kennis en start je antwoord met "Op basis van algemene informatie...".
+            3.  Als een link (URL) wordt vermeld, neem deze dan ALTIJD op in je antwoord. Schrijf de URL volledig uit.
+            CONTEXT:
+            ${context}`;
             
             const messages = [{ role: 'system', content: systemPrompt }, { role: 'user', content: question }];
-            const aiResponse = await ai.run('@cf/meta/llama-3-8b-instruct', { messages });
-            
-            let finalAnswer = aiResponse.response;
 
-            // --- DE NIEUWE, BETROUWBARE DISCLAIMER LOGICA ---
+            // --- DE MOTOR UPGRADE: van ai.run naar OpenAI fetch ---
+            const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: messages
+                })
+            });
+
+            if (!openAIResponse.ok) {
+                throw new Error(`OpenAI API fout: ${openAIResponse.status} ${await openAIResponse.text()}`);
+            }
+
+            const responseData = await openAIResponse.json();
+            let finalAnswer = responseData.choices[0].message.content;
+
+            // De betrouwbare disclaimer-logica blijft behouden
             if (contextFound) {
                 finalAnswer += "\n\nLet op: deze informatie is van algemene aard. Voor persoonlijk medisch advies, raadpleeg altijd uw arts.";
+            } else {
+                 finalAnswer += "\n\nHoud er rekening mee dat ik voornamelijk ben ontworpen om vragen over diabetes en de Diabetes Liga Midden-Limburg te beantwoorden.";
             }
             
-            const responsePayload = { choices: [{ message: { role: 'assistant', content: finalAnswer } }] };
-            return new Response(JSON.stringify(responsePayload), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            const finalPayload = { choices: [{ message: { role: 'assistant', content: finalAnswer } }] };
+            return new Response(JSON.stringify(finalPayload), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
         } catch (e) {
             return new Response(`Er is een fout opgetreden: ${e.message}`, { status: 500, headers: corsHeaders });
         }
