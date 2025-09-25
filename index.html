@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Diabetes Chatbot – Testpagina</title>
+  
+  <link rel="stylesheet" href="chatbot.css">
+
 
     <style>
       /* --- ALGEMENE STYLING & LANDINGSPAGINA LOOK --- */
@@ -130,13 +133,33 @@
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
     <div id="chat-box"></div>
+	
+	<!-- HELP-POPUP BEGIN -->
+<div id="chatbot-help-container">
+  <div id="chatbot-help-popup" class="hidden">
+    <strong>ℹ️ Wat kan je vragen?</strong><br>
+    • Activiteiten van DLML (zoals infosessies, wandelingen, uitstappen…)<br>
+    • Contactgegevens van bestuursleden<br>
+    • Vragen over diabetes, voeding, rijbewijs, medicatie…<br><br>
+    📁 Onder het invoerveld vind je een lijst met presentaties die je kunt openen of downloaden.<br>
+    🤖 Antwoorden zijn informatief en geen vervanging voor medisch advies.<br>
+    🌐 De chatbot heeft geen live toegang tot het internet.<br><br>
+    <button id="chatbot-help-close">Sluiten</button>
+  </div>
+</div>
+<!-- HELP-POPUP EINDE -->
 
     <!-- DE CORRECTE VOLGORDE: EERST HET INVOERVELD -->
     <div id="chatbot-input-area">
       <input type="text" id="chat-input" placeholder="Typ je vraag..." />
-      <button id="chatbot-help-btn">?</button>
+      <button id="chatbot-help-icon">?</button>
       <button id="chatbot-send" onclick="sendMessage()">▶</button>
     </div>
+	
+	<div id="chatbot-reset-area">
+  <button id="reset-button">♻️ Reset</button>
+</div>
+
 
     <!-- DAARNA DE AFROLLIJST -->
     <div id="chatbot-downloads-area">
@@ -180,22 +203,6 @@
       }
       populateDownloads();
 
-      // --- NIEUWE CODE VOOR DE HELP KNOP ---
-      document.getElementById("chatbot-help-btn").addEventListener("click", function() {
-        const chatBox = document.getElementById("chat-box");
-        const helpText = `Hallo! Ik ben de AI Assistent van de Diabetes Liga Midden-Limburg. U kunt mij vragen stellen over:
-<br>- Onze activiteiten en infosessies
-<br>- Contactgegevens van het bestuur
-<br>- Algemene onderwerpen over diabetes
-<br>
-<br>Als ik het antwoord niet weet in mijn eigen documenten, probeer ik het met mijn algemene kennis. Ik ben een computerprogramma en kan geen medisch advies geven.`;
-
-        const helpMessage = document.createElement("div");
-        helpMessage.className = "message assistant-message";
-        helpMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div>${helpText}</div>`;
-        chatBox.appendChild(helpMessage);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
 
       // --- BESTAANDE CODE VOOR DE ANDERE KNOPPEN ---
       document.getElementById("chatbot-button").addEventListener("click", function () {
@@ -207,6 +214,34 @@
       });
     });
   </script>
+  
+  <script>
+  document.getElementById("chatbot-help-icon").addEventListener("click", () => {
+    const popup = document.getElementById("chatbot-help-popup");
+    popup.classList.toggle("hidden");
+  });
+
+  document.getElementById("chatbot-help-close").addEventListener("click", () => {
+    document.getElementById("chatbot-help-popup").classList.add("hidden");
+  });
+</script>
+
+<script>
+  document.getElementById("reset-button").addEventListener("click", () => {
+    // Wis de chatgeschiedenis
+    const messages = document.getElementById("chat-box");
+    if (messages) messages.innerHTML = "";
+
+    // Wis het invoerveld
+    const input = document.getElementById("chat-input");
+    if (input) input.value = "";
+
+    // Zet dropdown terug naar standaardwaarde (indien aanwezig)
+    const dropdown = document.getElementById("downloads-select");
+    if (dropdown) dropdown.selectedIndex = 0;
+  });
+</script>
+
 
 </body>
 </html>

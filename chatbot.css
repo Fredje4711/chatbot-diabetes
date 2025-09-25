@@ -1,6 +1,6 @@
 
 body {
-  background-color: red !important;
+   background-color: #f9f9f9 !important;
 }
 
 /* Stijl voor de chatknop */
@@ -147,3 +147,64 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+#chatbot-help-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+#chatbot-help-icon {
+  cursor: pointer;
+  font-size: 1.3em;
+  background: #eee;
+  border-radius: 50%;
+  padding: 2px 6px;
+  margin-right: 5px;
+}
+
+#chatbot-help-popup {
+  position: fixed;
+  bottom: 280px;
+  right: 20px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #aaa;
+  padding: 14px 20px;
+  font-size: 0.9em;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 9999;
+  border-radius: 8px;
+}
+
+#chatbot-help-popup button {
+  margin-top: 8px;
+  padding: 4px 8px;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+#chatbot-reset-area {
+  display: flex;
+  justify-content: flex-end;
+  margin: 8px 10px 0 10px;
+}
+
+#reset-button {
+  background-color: #eee;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#reset-button:hover {
+  background-color: #ddd;
+}
+
+
