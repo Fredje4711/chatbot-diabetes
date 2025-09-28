@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Diabetes Chatbot – Testpagina</title>
-  
-  <link rel="stylesheet" href="chatbot.css">
-
-
+  <link rel="stylesheet" href="chatbot.css" />
     <style>
       /* --- ALGEMENE STYLING & LANDINGSPAGINA LOOK --- */
       body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; padding: 0; background-color: #f9f9f9; }
@@ -16,7 +13,7 @@
         background-color: #007bff;
         color: white;
         text-align: center;
-        padding: 25px 20px;
+        padding: 1px 0px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
       .header-content h1 {
@@ -24,22 +21,22 @@
         font-size: 2em;
       }
       .header-content p {
-        margin: 5px 0 0;
+        margin: 2px 0 0;
         font-size: 1.1em;
         opacity: 0.9;
       }
 
       .intro-content { 
         max-width: 800px;
-        margin: 40px auto;
-        padding: 20px; 
+        margin: 10px auto 30px auto; /* bovenruimte verlaagd van 40px naar 20px */
+        padding: 0px 15px; /* verhoogd: 30px boven/onder, 40px links/rechts */ 
         background-color: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         line-height: 1.7; 
       }
       .intro-content h1 { color: #0056b3; font-size: 1.8em; }
-      .intro-content h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 30px; }
+      .intro-content h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 10px; }
       .intro-content code { background-color: #e9e9eb; padding: 3px 7px; border-radius: 4px; font-family: monospace; }
       .intro-content ol, .intro-content ul { padding-left: 20px; }
 
@@ -88,43 +85,110 @@
       #chatbot-help-btn:hover {
         background-color: #e9e9eb;
       }
+	  details {
+  margin-top: 20px;
+}
+
+details summary {
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.suggestion {
+  display: inline-block;
+  margin: 4px 4px 10px 0;
+  padding: 6px 12px;
+  background-color: #e9f1ff;
+  border: 1px solid #b0d4ff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.suggestion:hover {
+  background-color: #d3e7ff;
+}
+
     </style>
 </head>
 <body>
 
   <header class="page-header">
-    <div class="header-content">
-      <h1>Diabetes Liga Midden-Limburg</h1>
-      <p>Een Assistent voor informatie en ondersteuning</p>
-    </div>
+    <h1>Diabetes Liga Midden-Limburg</h1>
+    <p>Een Assistent voor informatie en ondersteuning</p>
   </header>
 
-  <main class="intro-content">
-    <p>Dit is de eerste werkende DLML chatbot versie. Het is voorlopig nog een probeersel in ontwikkeling wat eventueel in de toekomst nuttig kan zijn als bijkomende vorm van communicatie.</p>
-    <h2>Hoe werkt deze chatbot?</h2>
-    <ol>
-      <li><strong>Eerst zoekt hij in onze eigen info:</strong> Ik heb wat DLML-gegevens toegevoegd over onze activiteiten en het bestuur, samen met de Q&A data over diabetes die ik reeds had.</li>
-      <li><strong>Daarna gebruikt hij zijn algemene kennis:</strong> Als hij het antwoord niet in de toegevoegde info vindt, zal hij proberen de vraag te beantwoorden met zijn algemene kennis.</li>
-      <li><strong>Als niets lukt, geeft hij dat eerlijk toe:</strong> Vindt hij nergens een antwoord, dan geeft hij een standaardmelding met een doorverwijzing.</li>
-    </ol>
-    <p><em>Belangrijk om te weten:</em> Omdat ik gebruik maak van een gratis opzet, heeft de chatbot zijn beperkingen. Hij kan bijvoorbeeld niet live op het internet zoeken in websites (een betalende functie). Desondanks verwacht ik dat hij het overgrote deel van de vragen over diabetes en DLML correct kan beantwoorden.</p>
-    <h2>Wat kunnen jullie testen?</h2>
-    <p>Probeer gerust verschillende soorten vragen om te zien hoe hij reageert:</p>
-    <ul>
-      <li><strong>Vragen over onze activiteiten:</strong><br><em>Voorbeeld:</em> <code>Wat is er te doen in december.</code> of <code>Geef alle info over de Herkenrode wandeling.</code></li>
-      <li><strong>Vragen over het bestuur:</strong><br><em>Voorbeeld:</em> <code>Geef alle bestuursleden.</code> of <code>Wie is Guido Smets.</code></li>
-      <li><strong>Vragen over diabetes (uit de kennisbank):</strong><br><em>Voorbeeld:</em> <code>Moet mijn voorlopig rijbewijs aangepast worden.</code> of <code>Is diabetes te genezen.</code></li>
-      <li><strong>Algemene kennisvragen:</strong><br><em>Voorbeeld:</em> <code>Wat is de hoofdstad van Canada.</code></li>
-    </ul>
-    <h2>Jullie feedback.</h2>
-    <p>Na het testen hoor ik graag jullie feedback. Let vooral op de volgende zaken:</p>
-    <ul>
-      <li><strong>Foute of onvolledige antwoorden:</strong> Vond je een vraag waarop de chatbot duidelijk verkeerd antwoordde? Geef de exacte vraag aan mij door!</li>
-      <li><strong>Niet-gevonden antwoorden:</strong> Stelde je een vraag waarvan je vindt dat het antwoord in onze kennisbank zou moeten zitten, maar kreeg je een "ik weet het niet"-melding?</li>
-      <li><strong>Gebruiksgemak:</strong> Is de chatbot makkelijk in gebruik? Is de opmaak duidelijk? Alle suggesties zijn welkom.</li>
-    </ul>
-    <p>Alvast bedankt voor het testen!</p>
-  </main>
+<main>
+  <div class="intro-content">
+    <section>
+      <h2>Wat kunnen jullie testen?</h2>
+      <p><strong>💻 Voor pc-gebruik:</strong><br>
+Open de chatbot, kies een rubriek en een vraag. Deze komt automatisch in het invoerveld terecht. Druk daarna op <em>Enter</em> of klik op de verzendknop. Je kunt daarna gewoon meerdere vragen selecteren zonder de chatbot te sluiten.</p>
+
+<p><strong>📱 Tip voor gsm-gebruik:</strong><br>
+Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden, en sluit de chatbot. Kies dan een volgende vraag, open opnieuw en verzend opnieuw.</p>
+
+
+      <details>
+        <summary><strong>Activiteiten</strong></summary>
+        <button class="suggestion">Geef alle activiteiten</button>
+        <button class="suggestion">Wat is er te doen in december?</button>
+        <button class="suggestion">Geef alle info over het ledenfeest</button>
+        <button class="suggestion">Vertel meer over de Herkenrode wandeling</button>
+        <button class="suggestion">Wat is het programma van het praatcafé?</button>
+      </details>
+
+      <details>
+        <summary><strong>Bestuursleden</strong></summary>
+        <button class="suggestion">Wie zit er in het bestuur?</button>
+        <button class="suggestion">Geef alle bestuursleden</button>
+        <button class="suggestion">Wat is het telefoonnummer van Guido Smets?</button>
+        <button class="suggestion">Geef e-mail van Eddy Foulon</button>
+        <button class="suggestion">Hoe contacteer ik André Latet?</button>
+      </details>
+
+      <details>
+        <summary><strong>Contact & Algemeen</strong></summary>
+        <button class="suggestion">Wat is het algemene e-mailadres?</button>
+        <button class="suggestion">Wat is de website van DLML?</button>
+        <button class="suggestion">Hoe contact opnemen met DLML?</button>
+        <button class="suggestion">Welke regio omvat DLML?</button>
+        <button class="suggestion">Hoe word ik lid?</button>
+      </details>
+
+      <details>
+        <summary><strong>Sociale media</strong></summary>
+        <button class="suggestion">Waar vind ik jullie op Facebook?</button>
+        <button class="suggestion">Hebben jullie een Instagram?</button>
+        <button class="suggestion">Zijn jullie op YouTube?</button>
+        <button class="suggestion">Geef alle sociale media</button>
+        <button class="suggestion">Wat zijn jullie socials?</button>
+      </details>
+
+      <details>
+        <summary><strong>Diabetes – Q&A</strong></summary>
+        <button class="suggestion">Wat is het verschil tussen type 1 en type 2 diabetes?</button>
+        <button class="suggestion">Wat zijn de eerste symptomen van diabetes?</button>
+        <button class="suggestion">Kan je genezen van diabetes type 2?</button>
+        <button class="suggestion">Wat zijn de complicaties van diabetes?</button>
+        <button class="suggestion">Wat is zwangerschapsdiabetes?</button>
+      </details>
+    </section>
+
+    <section class="feedback">
+      <h2>Jullie feedback.</h2>
+      <p>Na het testen hoor ik graag jullie feedback. Let vooral op de volgende zaken:</p>
+      <ul>
+        <li><strong>Foute of onvolledige antwoorden:</strong> Vond je een vraag waarop de chatbot duidelijk verkeerd antwoordde? Geef de exacte vraag aan mij door!</li>
+        <li><strong>Niet-gevonden antwoorden:</strong> Stel je een vraag waarvan je vindt dat het antwoord in onze kennisbank zou moeten zitten, maar kreeg je een soort van "ik weet het niet"-melding?</li>
+        <li><strong>Gebruiksgemak:</strong> Is de chatbot makkelijk in gebruik? Is de opmaak duidelijk? Alle suggesties zijn welkom.</li>
+      </ul>
+      <p>Alvast bedankt voor het testen!</p>
+    </section>
+  </div>
+</main>
+
 
   <!-- De chatbot-elementen -->
  
@@ -239,6 +303,17 @@
     // Zet dropdown terug naar standaardwaarde (indien aanwezig)
     const dropdown = document.getElementById("downloads-select");
     if (dropdown) dropdown.selectedIndex = 0;
+  });
+</script>
+
+<script>
+  // Automatisch voorbeeldvragen in het invoerveld zetten
+  document.querySelectorAll(".suggestion").forEach(button => {
+    button.addEventListener("click", () => {
+      const input = document.getElementById("chat-input");
+      input.value = button.textContent;
+      input.focus(); // cursor erin
+    });
   });
 </script>
 

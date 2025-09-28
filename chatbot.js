@@ -68,3 +68,16 @@ async function sendMessage() {
     chat.appendChild(errorMessage);
   }
 }
+// Suggestieknoppen koppelen aan invoerveld
+document.querySelectorAll('.suggestion').forEach(button => {
+  button.addEventListener('click', () => {
+    const vraag = button.textContent.trim();
+    const inputField = document.getElementById('user-input');
+
+    inputField.value = vraag;
+    inputField.focus(); // cursor in het veld zetten
+
+    // Optioneel automatisch verzenden:
+    // document.querySelector('form').dispatchEvent(new Event('submit'));
+  });
+});
