@@ -286,6 +286,17 @@ Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden, e
         }
       }
       populateDownloads();
+	  
+	  // Koppel de suggestieknoppen aan het invoerveld
+document.querySelectorAll(".suggestion").forEach(button => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById("chat-input");
+    if (input) {
+      input.value = button.textContent.trim();
+      input.focus();
+    }
+  });
+});
 
 
       // --- BESTAANDE CODE VOOR DE ANDERE KNOPPEN ---
@@ -323,17 +334,6 @@ Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden, e
     // Zet dropdown terug naar standaardwaarde (indien aanwezig)
     const dropdown = document.getElementById("downloads-select");
     if (dropdown) dropdown.selectedIndex = 0;
-  });
-</script>
-
-<script>
-  // Automatisch voorbeeldvragen in het invoerveld zetten
-  document.querySelectorAll(".suggestion").forEach(button => {
-    button.addEventListener("click", () => {
-      const input = document.getElementById("chat-input");
-      input.value = button.textContent;
-      input.focus(); // cursor erin
-    });
   });
 </script>
 

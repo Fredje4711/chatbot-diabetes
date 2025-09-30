@@ -47,6 +47,11 @@ async function sendMessage() {
         const cleanedUrl = url.replace(/[.,!?;:]+$/, '');
         return `<a href="${cleanedUrl}" target="_blank" rel="noopener noreferrer">${cleanedUrl}</a>`;
     });
+	
+	// Stap B2: Maak e-mailadressen aanklikbaar
+const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+formattedAntwoord = formattedAntwoord.replace(emailRegex, '<a href="mailto:$1">$1</a>');
+
     
     // Stap C: Converteer regeleindes naar <br>
     formattedAntwoord = formattedAntwoord.replace(/\n/g, '<br>');
@@ -68,16 +73,15 @@ async function sendMessage() {
     chat.appendChild(errorMessage);
   }
 }
-// Suggestieknoppen koppelen aan invoerveld
+// Suggestieknoppen koppelen aan invoerveld (met veilige check)
 document.querySelectorAll('.suggestion').forEach(button => {
   button.addEventListener('click', () => {
     const vraag = button.textContent.trim();
-    const inputField = document.getElementById('user-input');
+    const inputField = document.getElementById('chat-input');
 
-    inputField.value = vraag;
-    inputField.focus(); // cursor in het veld zetten
-
-    // Optioneel automatisch verzenden:
-    // document.querySelector('form').dispatchEvent(new Event('submit'));
+    if (inputField) {
+      inputField.value = vraag;
+      inputField.focus(); // cursor in het veld zetten
+    }
   });
 });
