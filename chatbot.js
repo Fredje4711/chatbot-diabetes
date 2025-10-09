@@ -5,14 +5,12 @@ async function sendMessage() {
 
   const chat = document.getElementById("chat-box");
 
-  // Toon gebruikersbericht
   const userMessage = document.createElement("div");
   userMessage.className = "message user-message";
   userMessage.innerHTML = `<span class="icon">🧑</span><div>${question}</div>`;
   chat.appendChild(userMessage);
   input.value = "";
 
-  // Toon loader
   const loadingMessage = document.createElement("div");
   loadingMessage.className = "message assistant-message loading";
   loadingMessage.innerHTML = `<span class="icon"><img src="logo.png" alt="Bot icon"></span><div><div class="loader"></div></div>`;
@@ -20,12 +18,11 @@ async function sendMessage() {
   chat.scrollTop = chat.scrollHeight;
 
   try {
-    // ✨ CORRECTIE: Stuur 'query' in plaats van 'question'
     const response = await fetch("https://diabetes-chatbot-worker.fredje4711.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: question 
+        question: question
       })
     });
 
@@ -34,22 +31,29 @@ async function sendMessage() {
         throw new Error(`Serverfout: ${response.status} - ${errorText}`);
     }
 
-    // ✨ CORRECTIE: Verwerk het nieuwe, gestructureerde antwoord
-    const data = await response.json(); 
-    let antwoord = data.content || "(Geen antwoord ontvangen)";
+    const data = await response.json();
+    const antwoord = data.choices?.[0]?.message?.content?.trim() || "(Geen antwoord ontvangen)";
     
-    // Voeg een introductie toe als het een 'OR' (bredere) zoekopdracht was
-    if (data.type === 'OR') {
-        antwoord = `Ik kon geen exact antwoord vinden voor uw volledige vraag, maar hier zijn resultaten die enkele van uw zoekwoorden bevatten:\n\n${antwoord}`;
-    }
+    // --- DEFINITIEVE, DUBBELE LINK-VERVANGER ---
 
-    // URL en e-mail regex (ongewijzigd)
-    const urlRegex = /(?<!href=")(https?:\/\/[^\s<]+)/g;
-    let formattedAntwoord = antwoord.replace(urlRegex, url => `<a href="${url.replace(/[.,!?;:]+$/, '')}" target="_blank" rel="noopener noreferrer">${url.replace(/[.,!?;:]+$/, '')}</a>`);
-    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
-    formattedAntwoord = formattedAntwoord.replace(emailRegex, '<a href="mailto:$1">$1</a>');
+    // Stap A: Converteer Markdown links ([titel](url)) eerst naar HTML links
+    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    let formattedAntwoord = antwoord.replace(markdownLinkRegex, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Stap B: Converteer daarna de overgebleven losse URLs naar HTML links
+    const urlRegex = /(?<!href=")(https?:\/\/[^\s<]+)/g; // Zoekt naar URLs die nog niet in een <a> tag staan
+    formattedAntwoord = formattedAntwoord.replace(urlRegex, (url) => {
+        // Verwijder eventuele leestekens aan het einde van de URL
+        const cleanedUrl = url.replace(/[.,!?;:]+$/, '');
+        return `<a href="${cleanedUrl}" target="_blank" rel="noopener noreferrer">${cleanedUrl}</a>`;
+    });
+	
+	// Stap B2: Maak e-mailadressen aanklikbaar
+const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+formattedAntwoord = formattedAntwoord.replace(emailRegex, '<a href="mailto:$1">$1</a>');
+
     
-    // Regeleindes converteren (ongewijzigd)
+    // Stap C: Converteer regeleindes naar <br>
     formattedAntwoord = formattedAntwoord.replace(/\n/g, '<br>');
 
     loadingMessage.remove();
@@ -69,3 +73,15 @@ async function sendMessage() {
     chat.appendChild(errorMessage);
   }
 }
+// Suggestieknoppen koppelen aan invoerveld (met veilige check)
+document.querySelectorAll('.suggestion').forEach(button => {
+  button.addEventListener('click', () => {
+    const vraag = button.textContent.trim();
+    const inputField = document.getElementById('chat-input');
+
+    if (inputField) {
+      inputField.value = vraag;
+      inputField.focus(); // cursor in het veld zetten
+    }
+  });
+});
