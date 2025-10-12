@@ -10,117 +10,110 @@
   <link rel="manifest" href="site.webmanifest">
 	
   <link rel="stylesheet" href="chatbot.css" />
-    <style>
-      /* --- ALGEMENE STYLING & LANDINGSPAGINA LOOK --- */
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; padding: 0; background-color: #f9f9f9; }
-      
-      .page-header {
-        background-color: #007bff;
-        color: white;
-        text-align: center;
-        padding: 1px 0px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .header-content h1 {
-        margin: 0;
-        font-size: 2em;
-      }
-      .header-content p {
-        margin: 2px 0 0;
-        font-size: 1.1em;
-        opacity: 0.9;
-      }
+  <style>
+    /* --- ALGEMENE STYLING & LANDINGSPAGINA LOOK --- */
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; padding: 0; background-color: #f9f9f9; }
+    
+    /* Nieuw: compact info-blok bovenaan (voor de header) */
+    .top-info {
+      background:#f5f5f5; color:#000; margin:0; padding:6px 10px;
+      border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.08);
+      font-size:1.05em; line-height:1.5em;
+    }
+    .top-info p { margin:4px 0; padding:0; }
 
-      .intro-content { 
-        max-width: 800px;
-        margin: 10px auto 30px auto; /* bovenruimte verlaagd van 40px naar 20px */
-        padding: 0px 15px; /* verhoogd: 30px boven/onder, 40px links/rechts */ 
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        line-height: 1.7; 
-      }
-      .intro-content h1 { color: #0056b3; font-size: 1.8em; }
-      .intro-content h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 10px; }
-      .intro-content code { background-color: #e9e9eb; padding: 3px 7px; border-radius: 4px; font-family: monospace; }
-      .intro-content ol, .intro-content ul { padding-left: 20px; }
+    .page-header {
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 1px 0px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header-content h1 { margin: 0; font-size: 2em; }
+    .header-content p { margin: 2px 0 0; font-size: 1.1em; opacity: 0.9; }
 
-      /* --- CHATBOT STYLING --- */
-      #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
-      #chatbot-container { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; border: 1px solid #ccc; border-radius: 10px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 1000; }
-      #chatbot-header { background-color: #007bff; color: white; padding: 10px; font-weight: bold; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
-      #chat-box { flex: 1; padding: 10px; overflow-y: auto; font-size: 14px; }
-      #chatbot-input-area { display: flex; border-top: 1px solid #ccc; }
-      #chat-input { flex: 1; border: none; padding: 10px; font-size: 14px; }
-      #chatbot-send { background-color: #007bff; color: white; border: none; padding: 0 16px; cursor: pointer; }
-      
-      .message { display: flex; align-items: flex-start; margin: 10px 0; max-width: 85%; line-height: 1.4; }
-      .message div { padding: 10px 12px; border-radius: 18px; overflow-wrap: break-word; color: #000000 !important;}
-	  /* DE NIEUWE, SPECIFIEKE REGEL HIERONDER */
-.message div a {
-    word-break: break-all; /* Forceert afbreken alleen voor URLs */
-}
-      .message .icon { width: 32px; height: 32px; flex-shrink: 0; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 50%; overflow: hidden; }
-      .message .icon img { width: 100%; height: 100%; object-fit: cover; }
-      .user-message { margin-left: auto; flex-direction: row-reverse; }
-      .user-message .icon { margin-left: 8px; margin-right: 0; }
-      .user-message div { background-color: #dcf8c6; border-bottom-right-radius: 4px; }
-      .assistant-message { margin-right: auto; }
-      .assistant-message div { background-color: #f1f0f0; border-bottom-left-radius: 4px; }
-      .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; width: 4px; height: 4px; animation: spin 1.5s linear infinite; margin: 4px; }
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      
-      @media (max-width: 480px) { #chatbot-container { width: 90%; left: 5%; right: 5%; } }
-	  
-      #chatbot-downloads-area { padding: 8px 10px; border-top: 1px solid #ccc; background-color: #f8f9fa; }
-      #chatbot-downloads-area label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #555; }
-      #downloads-select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 13px; }
+    .intro-content { 
+      max-width: 800px;
+      margin: 10px auto 30px auto;
+      padding: 0px 15px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      line-height: 1.7; 
+    }
+    .intro-content h1 { color: #0056b3; font-size: 1.8em; }
+    .intro-content h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 10px; }
+    .intro-content code { background-color: #e9e9eb; padding: 3px 7px; border-radius: 4px; font-family: monospace; }
+    .intro-content ol, .intro-content ul { padding-left: 20px; }
 
-      /* Styling voor de nieuwe help-knop */
-      #chatbot-help-btn {
-        background-color: #f1f0f0;
-        color: #555;
-        border: none;
-        border-left: 1px solid #ccc;
-        padding: 0 12px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      #chatbot-help-btn:hover {
-        background-color: #e9e9eb;
-      }
-	  details {
-  margin-top: 20px;
-}
+    /* --- CHATBOT STYLING --- */
+    #chatbot-button { position: fixed; bottom: 20px; right: 20px; background-color: #007bff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; text-align: center; line-height: 60px; cursor: pointer; z-index: 1000; }
+    #chatbot-container { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; border: 1px solid #ccc; border-radius: 10px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 1000; }
+    #chatbot-header { background-color: #007bff; color: white; padding: 10px; font-weight: bold; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+    #chat-box { flex: 1; padding: 10px; overflow-y: auto; font-size: 14px; }
+    #chatbot-input-area { display: flex; border-top: 1px solid #ccc; }
+    #chat-input { flex: 1; border: none; padding: 10px; font-size: 14px; }
+    #chatbot-send { background-color: #007bff; color: white; border: none; padding: 0 16px; cursor: pointer; }
+    
+    .message { display: flex; align-items: flex-start; margin: 10px 0; max-width: 85%; line-height: 1.4; }
+    .message div { padding: 10px 12px; border-radius: 18px; overflow-wrap: break-word; color: #000000 !important;}
+    /* DE NIEUWE, SPECIFIEKE REGEL HIERONDER */
+    .message div a { word-break: break-all; }
+    .message .icon { width: 32px; height: 32px; flex-shrink: 0; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 50%; overflow: hidden; }
+    .message .icon img { width: 100%; height: 100%; object-fit: cover; }
+    .user-message { margin-left: auto; flex-direction: row-reverse; }
+    .user-message .icon { margin-left: 8px; margin-right: 0; }
+    .user-message div { background-color: #dcf8c6; border-bottom-right-radius: 4px; }
+    .assistant-message { margin-right: auto; }
+    .assistant-message div { background-color: #f1f0f0; border-bottom-left-radius: 4px; }
+    .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; width: 4px; height: 4px; animation: spin 1.5s linear infinite; margin: 4px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    @media (max-width: 480px) { #chatbot-container { width: 90%; left: 5%; right: 5%; } }
+    
+    #chatbot-downloads-area { padding: 8px 10px; border-top: 1px solid #ccc; background-color: #f8f9fa; }
+    #chatbot-downloads-area label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #555; }
+    #downloads-select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 13px; }
 
-details summary {
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 8px;
-}
+    /* Styling voor de nieuwe help-knop */
+    #chatbot-help-btn {
+      background-color: #f1f0f0;
+      color: #555;
+      border: none;
+      border-left: 1px solid #ccc;
+      padding: 0 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #chatbot-help-btn:hover { background-color: #e9e9eb; }
 
-.suggestion {
-  display: inline-block;
-  margin: 4px 4px 10px 0;
-  padding: 6px 12px;
-  background-color: #e9f1ff;
-  border: 1px solid #b0d4ff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
+    details { margin-top: 20px; }
+    details summary { font-weight: bold; cursor: pointer; margin-bottom: 8px; }
 
-.suggestion:hover {
-  background-color: #d3e7ff;
-}
+    .suggestion {
+      display: inline-block;
+      margin: 4px 4px 10px 0;
+      padding: 6px 12px;
+      background-color: #e9f1ff;
+      border: 1px solid #b0d4ff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .suggestion:hover { background-color: #d3e7ff; }
 
-
-    </style>
+    /* Compacte feedbackregel onderaan */
+    .feedback-compact {
+      text-align:center; color:#000; background:#f5f5f5;
+      font-size:1em; padding:6px 8px; margin:8px 0;
+      border-radius:6px;
+    }
+  </style>
 </head>
 <body>
 
-  <header class="page-header">
+    <header class="page-header">
     <h1>Diabetes Liga Midden-Limburg</h1>
     <p>Een Assistent voor informatie en ondersteuning</p>
   </header>
@@ -130,142 +123,144 @@ details summary {
     <section>
       <h2>Wat kunnen jullie testen?</h2>
       <p><strong>💻 Voor pc-gebruik:</strong><br>
-Open de chatbot, kies hieronder een rubriek en een vraag. Deze komt automatisch in het invoerveld terecht. Druk daarna op <em>Enter</em> of klik op de verzendknop. Je kunt daarna gewoon andere vragen selecteren zonder de chatbot te sluiten.</p>
+      Open de chatbot, kies hieronder een rubriek en een vraag. Deze komt automatisch in het invoerveld terecht. Druk daarna op <em>Enter</em> of klik op de verzendknop. Je kunt daarna gewoon andere vragen selecteren zonder de chatbot te sluiten.</p>
 
-<p><strong>📱 Tip voor gsm-gebruik:</strong><br>
-Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden om het antwoord te zien, sluit de chatbot. Kies dan een volgende vraag, open opnieuw en verzend opnieuw.</p>
+      <p><strong>📱 Tip voor gsm-gebruik:</strong><br>
+      Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden om het antwoord te zien, sluit de chatbot. Kies dan een volgende vraag, open opnieuw en verzend opnieuw.</p>
 
-
+      <!-- ACTIVITEITEN -->
       <details>
         <summary><strong>Activiteiten</strong></summary>
-        <button class="suggestion">Geef alle activiteiten</button>
-        <button class="suggestion">Wat is er te doen in december?</button>
-        <button class="suggestion">Geef alle info over het ledenfeest</button>
-        <button class="suggestion">Vertel meer over de Herkenrode wandeling</button>
-        <button class="suggestion">Wat is het programma van het praatcafé?</button>
+        <button class="suggestion">Wat organiseert DLML de komende maanden?</button>
+        <button class="suggestion">Welke activiteiten zijn er in december?</button>
+        <button class="suggestion">Wanneer is het ledenfeest van DLML?</button>
+        <button class="suggestion">Wat houdt de Herkenrode wandeling in?</button>
+        <button class="suggestion">Wanneer is het wandelevenement voor Wereld Diabetes Dag?</button>
+        <button class="suggestion">Kun je alle wandelactiviteiten van DLML tonen?</button>
+        <button class="suggestion">Waar vind ik praktische info over het praatcafé?</button>
       </details>
 
+      <!-- BESTUURSLEDEN -->
       <details>
         <summary><strong>Bestuursleden</strong></summary>
-        <button class="suggestion">Wie zit er in het bestuur?</button>
-        <button class="suggestion">Geef alle bestuursleden</button>
-        <button class="suggestion">Wat is het telefoonnummer van Guido Smets?</button>
-        <button class="suggestion">Geef e-mail van Eddy Foulon</button>
-        <button class="suggestion">Hoe contacteer ik André Latet?</button>
+        <button class="suggestion">Wie zit er in het bestuur van DLML?</button>
+        <button class="suggestion">Wie is de voorzitter van DLML?</button>
+        <button class="suggestion">Kun je me iets vertellen over Guido Smets?</button>
+        <button class="suggestion">Wat is het e-mailadres van Eddy Foulon?</button>
+        <button class="suggestion">Hoe kan ik André Latet contacteren?</button>
+        <button class="suggestion">Wie is Marita en wat doet ze?</button>
+        <button class="suggestion">Geef een overzicht van alle bestuursleden met functie.</button>
       </details>
 
+      <!-- CONTACT & ALGEMEEN -->
       <details>
         <summary><strong>Contact & Algemeen</strong></summary>
-        <button class="suggestion">Wat is het algemene e-mailadres?</button>
+        <button class="suggestion">Wat is het algemene e-mailadres van DLML?</button>
         <button class="suggestion">Wat is de website van DLML?</button>
-        <button class="suggestion">Hoe contact opnemen met DLML?</button>
-        <button class="suggestion">Welke regio omvat DLML?</button>
-        <button class="suggestion">Hoe word ik lid?</button>
+        <button class="suggestion">Hoe kan ik lid worden van DLML?</button>
+        <button class="suggestion">Welke regio’s vallen onder DLML?</button>
+        <button class="suggestion">Wat doet Diabetes Liga Midden-Limburg precies?</button>
+        <button class="suggestion">Wat zijn de openingsuren van het secretariaat?</button>
+        <button class="suggestion">Hoe kan ik jullie het snelst bereiken?</button>
       </details>
 
+      <!-- SOCIALE MEDIA -->
       <details>
         <summary><strong>Sociale media</strong></summary>
         <button class="suggestion">Waar vind ik jullie op Facebook?</button>
-        <button class="suggestion">Hebben jullie een Instagram?</button>
-        <button class="suggestion">Zijn jullie op YouTube?</button>
-        <button class="suggestion">Geef alle sociale media</button>
-        <button class="suggestion">Wat zijn jullie socials?</button>
+        <button class="suggestion">Hebben jullie een Instagram-account?</button>
+        <button class="suggestion">Zijn jullie actief op YouTube?</button>
+        <button class="suggestion">Welke sociale media kanalen hebben jullie?</button>
+        <button class="suggestion">Kun je me alle socials van DLML geven?</button>
+        <button class="suggestion">Waar kan ik updates en foto’s volgen?</button>
+        <button class="suggestion">Geef de link naar jullie website.</button>
       </details>
 
+      <!-- DIABETES – Q&A -->
       <details>
         <summary><strong>Diabetes – Q&A</strong></summary>
-        <button class="suggestion">Wat is het verschil tussen type 1 en type 2 diabetes?</button>
-        <button class="suggestion">Wat zijn de eerste symptomen van diabetes?</button>
-        <button class="suggestion">Kan je genezen van diabetes type 2?</button>
-        <button class="suggestion">Wat zijn de complicaties van diabetes?</button>
+        <button class="suggestion">Wat is het verschil tussen diabetes type 1 en type 2?</button>
+        <button class="suggestion">Wat zijn vroege symptomen van diabetes?</button>
+        <button class="suggestion">Kan diabetes type 2 verbeteren met leefstijl?</button>
+        <button class="suggestion">Wat is een hypo en wat doe ik dan?</button>
+        <button class="suggestion">Mag ik sporten met diabetes?</button>
         <button class="suggestion">Wat is zwangerschapsdiabetes?</button>
+        <button class="suggestion">Welke voeding is geschikt bij diabetes?</button>
       </details>
 	  
-	  <details>
+      <!-- ANDERE (ALGEMENE BEPERKTE KENNIS) -->
+      <details>
         <summary><strong>Andere (algemene beperkte kennis)</strong></summary>
+        <button class="suggestion">Vertel een kort mopje over Guido.</button>
+        <button class="suggestion">Maak een kort rijmpje voor Marita.</button>
         <button class="suggestion">Wat is de hoofdstad van Canada?</button>
-        <button class="suggestion">Hoeveel is 20x10?</button>
-        <button class="suggestion">Wie is koning van België?</button>
-        <button class="suggestion">Hoeveel weegt de kleur blauw?</button>
+        <button class="suggestion">Hoeveel is 20 × 10?</button>
+        <button class="suggestion">Wie is de koning van België?</button>
         <button class="suggestion">Welke boom produceert eikels?</button>
+        <button class="suggestion">Vertel een leuk weetje over Hasselt.</button>
       </details>
-	  
     </section>
 
-    <section class="feedback">
-      <h2>Jullie feedback.</h2>
-      <p>Na het testen hoor ik graag jullie feedback. Let vooral op de volgende zaken:</p>
-      <ul>
-        <li><strong>Foute of onvolledige antwoorden:</strong> Vond je een vraag waarop de chatbot duidelijk verkeerd antwoordde? Geef de exacte vraag aan mij door!</li>
-        <li><strong>Niet-gevonden antwoorden:</strong> Stel je een vraag waarvan je vindt dat het antwoord in onze kennisbank zou moeten zitten, maar kreeg je een soort van "ik weet het niet"-melding?</li>
-        <li><strong>Gebruiksgemak:</strong> Is de chatbot makkelijk in gebruik? Is de opmaak duidelijk? Alle suggesties zijn welkom.</li>
-      </ul>
-      <p>Alvast bedankt voor het testen!</p>
+    <!-- Feedback: ingekort tot één regel -->
+    <section class="feedback-compact">
+      💬 Alle vragen en opmerkingen zijn steeds welkom.
     </section>
-	
-	<section class="referentie-chatbot">
-  <h2>Chatbots in de praktijk</h2>
-  <p>Steeds meer organisaties gebruiken een chatbot om bezoekers snel te helpen. Een voorbeeld is <a href="https://eneco.be/nl/" target="_blank" rel="noopener noreferrer">Eneco</a>. Rechtsonder op hun website vind je chatbot <strong>Elli</strong>, die eenvoudige vragen over energie, contracten of facturen beantwoordt.</p>
-  <p><strong>Belangrijk:</strong> Ook deze chatbot is uitsluitend bedoeld voor algemene informatie en heeft géén toegang tot persoonlijke of vertrouwelijke gegevens.</p>
-</section>
 
-
-	
+    <!-- Referentie blijft -->
+    <section class="referentie-chatbot">
+      <h2>Chatbots in de praktijk</h2>
+      <p>Steeds meer organisaties gebruiken een chatbot om bezoekers snel te helpen. Een voorbeeld is <a href="https://eneco.be/nl/" target="_blank" rel="noopener noreferrer">Eneco</a>. Rechtsonder op hun website vind je chatbot <strong>Elli</strong>, die eenvoudige vragen over energie, contracten of facturen beantwoordt.</p>
+      <p><strong>Belangrijk:</strong> Ook deze chatbot is uitsluitend bedoeld voor algemene informatie en heeft géén toegang tot persoonlijke of vertrouwelijke gegevens.</p>
+    </section>
   </div>
 </main>
 
-
-  <!-- De chatbot-elementen -->
- 
-   <!-- De HTML-structuur voor de chatbot met de correcte volgorde -->
+  <!-- De chatbot-elementen (ongewijzigd) -->
   <div id="chatbot-button">💬</div>
   <div id="chatbot-container" style="display:none;">
     <div id="chatbot-header">Hulp & Info Diabetes</div>
     <div id="chat-box"></div>
 	
-	<!-- HELP-POPUP BEGIN -->
-<div id="chatbot-help-container">
-  <div id="chatbot-help-popup" class="hidden">
-    <strong>ℹ️ Wat kan je vragen?</strong><br>
-    • Activiteiten van DLML (zoals infosessies, wandelingen, uitstappen…)<br>
-    • Contactgegevens van bestuursleden<br>
-    • Vragen over diabetes, voeding, rijbewijs, medicatie…<br><br>
-    📁 Onder het invoerveld vind je een lijst met presentaties die je kunt openen of downloaden.<br>
-    🤖 Antwoorden zijn informatief en geen vervanging voor medisch advies.<br>
-    🌐 De chatbot heeft geen live toegang tot het internet.<br><br>
-    <button id="chatbot-help-close">Sluiten</button>
-  </div>
-</div>
-<!-- HELP-POPUP EINDE -->
+    <!-- HELP-POPUP BEGIN -->
+    <div id="chatbot-help-container">
+      <div id="chatbot-help-popup" class="hidden">
+        <strong>ℹ️ Wat kan je vragen?</strong><br>
+        • Activiteiten van DLML (zoals infosessies, wandelingen, uitstappen…)<br>
+        • Contactgegevens van bestuursleden<br>
+        • Vragen over diabetes, voeding, rijbewijs, medicatie…<br><br>
+        📁 Onder het invoerveld vind je een lijst met presentaties die je kunt openen of downloaden.<br>
+        🤖 Antwoorden zijn informatief en geen vervanging voor medisch advies.<br>
+        🌐 De chatbot heeft geen live toegang tot het internet.<br><br>
+        <button id="chatbot-help-close">Sluiten</button>
+      </div>
+    </div>
+    <!-- HELP-POPUP EINDE -->
 
-    <!-- DE CORRECTE VOLGORDE: EERST HET INVOERVELD -->
+    <!-- INVOERVELD -->
     <div id="chatbot-input-area">
       <input type="text" id="chat-input" placeholder="Typ je vraag..." />
       <button id="chatbot-help-icon">?</button>
       <button id="chatbot-send" onclick="sendMessage()">▶</button>
     </div>
 	
-	<div id="chatbot-reset-area">
-  <button id="reset-button">♻️ Reset</button>
-</div>
+    <div id="chatbot-reset-area">
+      <button id="reset-button">♻️ Reset</button>
+    </div>
 
-
-    <!-- DAARNA DE AFROLLIJST -->
+    <!-- DOWNLOADS -->
     <div id="chatbot-downloads-area">
       <label for="downloads-select">Of selecteer een presentatie:</label>
       <select id="downloads-select">
         <option value="">-- Kies een download --</option>
       </select>
     </div>
-    
   </div>
 
-  <!-- De scripts -->
+  <!-- De scripts (ongewijzigd) -->
   <script src="chatbot.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      
       // --- LOGICA VOOR DE AFROLLIJST ---
       async function populateDownloads() {
         try {
@@ -292,17 +287,16 @@ Selecteer eerst een voorbeeldvraag. Open daarna de chatbot, druk op verzenden om
       }
       populateDownloads();
 	  
-	  // Koppel de suggestieknoppen aan het invoerveld
-document.querySelectorAll(".suggestion").forEach(button => {
-  button.addEventListener("click", () => {
-    const input = document.getElementById("chat-input");
-    if (input) {
-      input.value = button.textContent.trim();
-      input.focus();
-    }
-  });
-});
-
+      // Koppel de suggestieknoppen aan het invoerveld
+      document.querySelectorAll(".suggestion").forEach(button => {
+        button.addEventListener("click", () => {
+          const input = document.getElementById("chat-input");
+          if (input) {
+            input.value = button.textContent.trim();
+            input.focus();
+          }
+        });
+      });
 
       // --- BESTAANDE CODE VOOR DE ANDERE KNOPPEN ---
       document.getElementById("chatbot-button").addEventListener("click", function () {
@@ -316,34 +310,31 @@ document.querySelectorAll(".suggestion").forEach(button => {
   </script>
   
   <script>
-  document.getElementById("chatbot-help-icon").addEventListener("click", () => {
-    const popup = document.getElementById("chatbot-help-popup");
-    popup.classList.toggle("hidden");
-  });
+    document.getElementById("chatbot-help-icon").addEventListener("click", () => {
+      const popup = document.getElementById("chatbot-help-popup");
+      popup.classList.toggle("hidden");
+    });
 
-  document.getElementById("chatbot-help-close").addEventListener("click", () => {
-    document.getElementById("chatbot-help-popup").classList.add("hidden");
-  });
-</script>
+    document.getElementById("chatbot-help-close").addEventListener("click", () => {
+      document.getElementById("chatbot-help-popup").classList.add("hidden");
+    });
+  </script>
 
-<script>
-  document.getElementById("reset-button").addEventListener("click", () => {
-    // Wis de chatgeschiedenis
-    const messages = document.getElementById("chat-box");
-    if (messages) messages.innerHTML = "";
+  <script>
+    document.getElementById("reset-button").addEventListener("click", () => {
+      // Wis de chatgeschiedenis
+      const messages = document.getElementById("chat-box");
+      if (messages) messages.innerHTML = "";
 
-    // Wis het invoerveld
-    const input = document.getElementById("chat-input");
-    if (input) input.value = "";
+      // Wis het invoerveld
+      const input = document.getElementById("chat-input");
+      if (input) input.value = "";
 
-    // Zet dropdown terug naar standaardwaarde (indien aanwezig)
-    const dropdown = document.getElementById("downloads-select");
-    if (dropdown) dropdown.selectedIndex = 0;
-  });
-</script>
-
+      // Zet dropdown terug naar standaardwaarde (indien aanwezig)
+      const dropdown = document.getElementById("downloads-select");
+      if (dropdown) dropdown.selectedIndex = 0;
+    });
+  </script>
 
 </body>
-
 </html>
-
